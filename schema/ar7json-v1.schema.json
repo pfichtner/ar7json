@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ar7json.dev/schema/ar7json-v1.schema.json",
+  "title": "AR7JSON Lossless AST",
+  "description": "JSON Schema for the ar7json lossless AST format, version 1",
+  "type": "object",
+  "required": ["format", "version", "document"],
+  "properties": {
+    "format": {
+      "const": "ar7json"
+    },
+    "version": {
+      "const": 1
+    },
+    "document": {
+      "$ref": "#/$defs/document"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "document": {
+      "type": "object",
+      "required": ["entries"],
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entry"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "entry": {
+      "type": "object",
+      "required": ["key", "value"],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/value"
+        }
+      },
+      "additionalProperties": false
+    },
+    "value": {
+      "oneOf": [
+        { "$ref": "#/$defs/string" },
+        { "$ref": "#/$defs/integer" },
+        { "$ref": "#/$defs/number" },
+        { "$ref": "#/$defs/boolean" },
+        { "$ref": "#/$defs/identifier" },
+        { "$ref": "#/$defs/duration" },
+        { "$ref": "#/$defs/ip_address" },
+        { "$ref": "#/$defs/mac_address" },
+        { "$ref": "#/$defs/list" },
+        { "$ref": "#/$defs/object" },
+        { "$ref": "#/$defs/raw" }
+      ]
+    },
+    "string": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "string" },
+        "value": { "type": "string" },
+        "raw": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "integer": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "integer" },
+        "value": { "type": "integer" },
+        "raw": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "number": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "number" },
+        "value": { "type": "string" },
+        "raw": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "boolean": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "boolean" },
+        "value": { "type": "boolean" },
+        "raw": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "identifier": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "identifier" },
+        "value": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "duration": {
+      "type": "object",
+      "required": ["type", "value", "unit"],
+      "properties": {
+        "type": { "const": "duration" },
+        "value": { "type": "integer" },
+        "unit": { "type": "string" },
+        "raw": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "ip_address": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "ip_address" },
+        "value": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "mac_address": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "mac_address" },
+        "value": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "list": {
+      "type": "object",
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "list" },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/value"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "object": {
+      "type": "object",
+      "required": ["type", "entries"],
+      "properties": {
+        "type": { "const": "object" },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entry"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "raw": {
+      "type": "object",
+      "required": ["type", "text"],
+      "properties": {
+        "type": { "const": "raw" },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

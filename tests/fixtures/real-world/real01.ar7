@@ -1,0 +1,37 @@
+/*
+ * /var/tmp.cfg
+ * Thu Jan 1 01:05:57 1970
+ */
+meta { encoding = "utf-8"; }
+
+ar7cfg {
+    // Configuration mode
+    mode = dsldmode_router;
+
+    active_provider = "tonline";
+    active_name = "";
+    igddenabled = no;
+    wan_bridge_with_dhcpc = yes;
+    wan_bridge_gateway = 0.0.0.0;
+
+    hsi_vlancfg {
+        vlanencap = vlanencap_none;
+        tagtype = vlantagtype_customer;
+        vlanid = 0;
+        vlanprio = 0;
+        tos = 0;
+    }
+
+    serialcfg {
+        mode = serialmode_off;
+        number = "*99#";
+        inactivity_timeout = 1m;
+
+        backup {
+            enabled = no;
+            quickstart = serialquickstart_off;
+            downtime = 3m;
+            reverttime = 30m;
+        }
+    }
+}

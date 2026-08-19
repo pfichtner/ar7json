@@ -1,0 +1,8 @@
+strings_test {
+    simple = "hello world";
+    escaped_quote = "foo \"bar\"";
+    escaped_backslash = "C:\\foo\\bar";
+    empty = "";
+    newline = "line1\nline2";
+    tab = "col1\tcol2";
+}

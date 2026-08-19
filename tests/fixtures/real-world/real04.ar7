@@ -1,0 +1,24 @@
+complex {
+    duplicate = 1;
+    duplicate = 2;
+    duplicate = "three";
+
+    numbers {
+        int_val = 42;
+        neg_val = -7;
+        float_val = 3.14;
+        zero = 0;
+        leading_zero = 001;
+    }
+
+    addrs {
+        ip = 192.168.178.1;
+        ip2 = 10.0.0.1;
+    }
+
+    lists {
+        empty_list =;
+        one_item = "only";
+        two_items = "a", "b";
+    }
+}

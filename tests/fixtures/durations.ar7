@@ -1,0 +1,7 @@
+durations_test {
+    milliseconds = 500ms;
+    seconds = 30s;
+    minutes = 5m;
+    hours = 2h;
+    days = 7d;
+}

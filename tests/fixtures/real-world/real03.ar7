@@ -1,0 +1,5 @@
+future_config {
+    new_option = new_value;
+    another = 42;
+    flag = yes;
+}

@@ -1,0 +1,28 @@
+meta { encoding = "utf-8"; }
+
+ar7cfg {
+    mode = dsldmode_router;
+    active_provider = "other";
+    active_name = "";
+    igddenabled = yes;
+    wan_bridge_gateway = 0.0.0.0;
+
+    hsi_vlancfg {
+        vlanencap = vlanencap_none;
+        vlanid = 0;
+        vlanprio = 0;
+        tos = 0;
+    }
+
+    serialcfg {
+        mode = serialmode_off;
+        number = "*99#";
+        inactivity_timeout = 1m;
+
+        backup {
+            enabled = no;
+            downtime = 3m;
+            reverttime = 30m;
+        }
+    }
+}

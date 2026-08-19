@@ -1,0 +1,149 @@
+#[cfg(test)]
+mod tests {
+    use ar7json::ast::*;
+    use ar7json::parse;
+
+    #[test]
+    fn empty_document() {
+        let doc = parse("").unwrap();
+        assert!(doc.entries.is_empty());
+    }
+
+    #[test]
+    fn single_assignment() {
+        let doc = parse("foo = 42;").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        assert_eq!(doc.entries[0].key, "foo");
+        assert!(matches!(doc.entries[0].value, Value::Integer(_)));
+    }
+
+    #[test]
+    fn nested_block() {
+        let doc = parse("block { key = value; }").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        assert_eq!(doc.entries[0].key, "block");
+        if let Value::Object(obj) = &doc.entries[0].value {
+            assert_eq!(obj.entries.len(), 1);
+            assert_eq!(obj.entries[0].key, "key");
+        } else {
+            panic!("expected object");
+        }
+    }
+
+    #[test]
+    fn deeply_nested_blocks() {
+        let doc = parse("a { b { c { d = 1; } } }").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        if let Value::Object(obj) = &doc.entries[0].value {
+            assert_eq!(obj.entries.len(), 1);
+            if let Value::Object(obj2) = &obj.entries[0].value {
+                assert_eq!(obj2.entries.len(), 1);
+                if let Value::Object(obj3) = &obj2.entries[0].value {
+                    assert_eq!(obj3.entries.len(), 1);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn list_values() {
+        let doc = parse("foo = \"a\", \"b\", \"c\";").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        if let Value::List(list) = &doc.entries[0].value {
+            assert_eq!(list.items.len(), 3);
+        } else {
+            panic!("expected list");
+        }
+    }
+
+    #[test]
+    fn multiline_list() {
+        let doc = parse("foo = \"a\",\n      \"b\",\n      \"c\";").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        if let Value::List(list) = &doc.entries[0].value {
+            assert_eq!(list.items.len(), 3);
+        } else {
+            panic!("expected list");
+        }
+    }
+
+    #[test]
+    fn duplicate_keys() {
+        let doc = parse("foo = 1;\nfoo = 2;").unwrap();
+        assert_eq!(doc.entries.len(), 2);
+        assert_eq!(doc.entries[0].key, "foo");
+        assert_eq!(doc.entries[1].key, "foo");
+    }
+
+    #[test]
+    fn comments_preserved() {
+        let doc = parse("// line comment\nfoo = 1;\n/* block */\nbar = 2;").unwrap();
+        assert_eq!(doc.entries.len(), 2);
+        assert_eq!(doc.entries[0].key, "foo");
+        assert_eq!(doc.entries[1].key, "bar");
+    }
+
+    #[test]
+    fn mixed_values() {
+        let doc = parse(
+            r#"
+            str = "hello";
+            int = 42;
+            neg = -7;
+            bool_yes = yes;
+            bool_no = no;
+            dur = 1m;
+            ident = some_value;
+            flt = 3.14;
+        "#,
+        )
+        .unwrap();
+        assert_eq!(doc.entries.len(), 8);
+        assert!(matches!(doc.entries[0].value, Value::String(_)));
+        assert!(matches!(doc.entries[1].value, Value::Integer(_)));
+        assert!(matches!(doc.entries[2].value, Value::Integer(_)));
+        assert!(matches!(doc.entries[3].value, Value::Boolean(ref b) if b.value == true));
+        assert!(matches!(doc.entries[4].value, Value::Boolean(ref b) if b.value == false));
+        assert!(matches!(doc.entries[5].value, Value::Duration(_)));
+        assert!(matches!(doc.entries[6].value, Value::Identifier(_)));
+        assert!(matches!(doc.entries[7].value, Value::Number(_)));
+    }
+
+    #[test]
+    fn unknown_identifiers_accepted() {
+        let doc = parse("completely_unknown_avm_setting = completely_unknown_value;").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        if let Value::Identifier(id) = &doc.entries[0].value {
+            assert_eq!(id.value, "completely_unknown_value");
+        }
+    }
+
+    #[test]
+    fn unknown_blocks_accepted() {
+        let doc = parse("future_config { new_option = new_value; }").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        assert_eq!(doc.entries[0].key, "future_config");
+    }
+
+    #[test]
+    fn minimal_fixture() {
+        let input = std::fs::read_to_string("tests/fixtures/minimal.ar7").unwrap();
+        let doc = parse(&input).unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        assert_eq!(doc.entries[0].key, "meta");
+    }
+
+    #[test]
+    fn nested_fixture() {
+        let input = std::fs::read_to_string("tests/fixtures/nested.ar7").unwrap();
+        let doc = parse(&input).unwrap();
+        assert!(doc.entries.len() >= 2);
+    }
+
+    #[test]
+    fn real_world_01() {
+        let input = std::fs::read_to_string("tests/fixtures/real-world/real01.ar7").unwrap();
+        let doc = parse(&input).unwrap();
+        assert!(doc.entries.len() >= 2);
+    }
+}

@@ -1,0 +1,6 @@
+lists_test {
+    single = "only";
+    short = "a", "b", "c";
+    integers = 1, 2, 3;
+    mixed = "text", 42, yes;
+}

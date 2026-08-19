@@ -1,0 +1,31 @@
+edge_cases {
+    empty_string = "";
+    single_char = "x";
+    negative_int = -42;
+    zero = 0;
+    large_int = 999999;
+    ip_addr = 192.168.178.1;
+    ip_loopback = 127.0.0.1;
+    floating = 3.14;
+    neg_float = -0.5;
+    duration_ms = 500ms;
+    duration_sec = 30s;
+    duration_min = 5m;
+    duration_hour = 2h;
+    duration_day = 7d;
+    bool_yes = yes;
+    bool_no = no;
+    dotted_ident = foo.bar.baz;
+    hyphen_ident = foo-bar;
+    colon_ident = ab:cd:ef:01:23:45;
+    empty_block {}
+    nested_deep {
+        a {
+            b {
+                c {
+                    d = 1;
+                }
+            }
+        }
+    }
+}
