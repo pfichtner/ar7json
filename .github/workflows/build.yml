@@ -3,8 +3,12 @@ name: Build
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
     branches: [main]
+
+permissions:
+  contents: write
 
 jobs:
   test:
@@ -20,6 +24,7 @@ jobs:
     needs: test
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - target: x86_64-unknown-linux-gnu
@@ -79,3 +84,52 @@ jobs:
           name: ${{ matrix.artifact }}
           path: target/${{ matrix.target }}/release/ar7json${{ endsWith(matrix.artifact, '.exe') && '.exe' || '' }}
           retention-days: 14
+
+      - name: Create archive (unix)
+        if: startsWith(github.ref, 'refs/tags/') && runner.os != 'Windows'
+        run: |
+          cd target/${{ matrix.target }}/release
+          tar czf ../../../ar7json-${{ github.ref_name }}-${{ matrix.target }}.tar.gz ar7json
+
+      - name: Create archive (windows)
+        if: startsWith(github.ref, 'refs/tags/') && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cd target/${{ matrix.target }}/release
+          Compress-Archive -Path ar7json.exe -DestinationPath ../../../ar7json-${{ github.ref_name }}-${{ matrix.target }}.zip
+
+      - name: Upload archive
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: ar7json-${{ github.ref_name }}-${{ matrix.target }}
+          path: ar7json-${{ github.ref_name }}-${{ matrix.target }}.*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ar7json-${{ github.ref_name }}-*
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Generate checksums
+        run: |
+          cd artifacts
+          for f in *; do
+            sha256sum "$f" >> "${{ github.ref_name }}-SHA256SUMS.txt"
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            artifacts/*
