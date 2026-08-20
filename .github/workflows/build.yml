@@ -17,11 +17,11 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Build release binary
-        run: cargo build --release
-
       - name: Run tests
         run: cargo test
+
+      - name: Build release binary
+        run: cargo build --release
 
       - name: Upload binary
         uses: actions/upload-artifact@v4

@@ -115,7 +115,11 @@ impl<'a> Parser<'a> {
             self.advance(); // consume =
             while self.skip_whitespace() {}
             trailing_trivia.extend(self.collect_comments());
-            let value = self.parse_value()?;
+            let value = if self.check(&TokenKind::Semicolon) {
+                Value::List(ListValue { items: Vec::new() })
+            } else {
+                self.parse_value()?
+            };
             trailing_trivia.extend(self.collect_comments());
             while self.skip_whitespace() {}
             trailing_trivia.extend(self.collect_comments());
@@ -323,7 +327,11 @@ impl<'a> Parser<'a> {
                 self.advance(); // consume =
                 while self.skip_whitespace() {}
                 trailing_trivia.extend(self.collect_comments());
-                let value = self.parse_value_with_depth(d)?;
+                let value = if self.check(&TokenKind::Semicolon) {
+                    Value::List(ListValue { items: Vec::new() })
+                } else {
+                    self.parse_value_with_depth(d)?
+                };
                 trailing_trivia.extend(self.collect_comments());
                 while self.skip_whitespace() {}
                 trailing_trivia.extend(self.collect_comments());
