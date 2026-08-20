@@ -11,6 +11,15 @@ formats (strings, integers, booleans, durations, identifiers, IP addresses, etc.
 This tool converts AR7 configuration files to a lossless JSON representation and back,
 preserving all syntax distinctions and supporting arbitrary/unknown AVM configuration keys.
 
+## Motivation
+
+Comparing and manipulating AR7 configuration files directly is cumbersome, as there are
+few tools that understand the format. JSON, on the other hand, has a mature ecosystem of
+tools for normalization, diffing, merging, querying, and transformation. By converting AR7
+to JSON, the full power of these existing tools can be applied to FRITZ!Box configurations,
+and the results can be converted back to AR7 without loss. This avoids writing a new
+dedicated tool for every common operation.
+
 ## Disclaimer
 
 **This project does not claim to be an official AVM implementation or specification of
