@@ -445,6 +445,8 @@ fn is_mac_address(s: &str) -> bool {
 }
 
 pub fn parse(input: &str) -> Result<Document, Ar7Error> {
+    let input = strip_avm_export_header(input);
+
     let mut lexer = Lexer::new(input);
     let tokens = lexer.tokenize().map_err(|e| Ar7Error::General {
         message: e.to_string(),
@@ -452,4 +454,16 @@ pub fn parse(input: &str) -> Result<Document, Ar7Error> {
 
     let mut parser = Parser::new(input, tokens);
     parser.parse_document()
+}
+
+fn strip_avm_export_header(input: &str) -> &str {
+    if !input.starts_with("****") {
+        return input;
+    }
+    if let Some(start) = input.find("/*") {
+        if let Some(end) = input[start..].find("*/") {
+            return input[start + end + 2..].trim_start();
+        }
+    }
+    input
 }

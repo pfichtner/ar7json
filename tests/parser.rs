@@ -146,4 +146,36 @@ mod tests {
         let doc = parse(&input).unwrap();
         assert!(doc.entries.len() >= 2);
     }
+
+    #[test]
+    fn avm_export_header_stripped() {
+        let input = "\
+**** FRITZ!Box 7490 (UI) CONFIGURATION EXPORT
+Password=$$$xxx
+FirmwareVersion=113.07.59
+**** CFGFILE:ar7.cfg
+/*
+ * /var/tmp.cfg
+ * Sun Sep  1 11:05:45 2024
+ */
+
+meta { encoding = \"utf-8\"; }
+ar7cfg {
+    mode = dsldmode_bridge;
+}
+";
+        let doc = parse(input).unwrap();
+        assert_eq!(doc.entries.len(), 2);
+        assert_eq!(doc.entries[0].key, "meta");
+        assert_eq!(doc.entries[1].key, "ar7cfg");
+    }
+
+    #[test]
+    fn plain_ar7_not_affected() {
+        let input = "meta { encoding = \"utf-8\"; }\nfoo = 42;";
+        let doc = parse(input).unwrap();
+        assert_eq!(doc.entries.len(), 2);
+        assert_eq!(doc.entries[0].key, "meta");
+        assert_eq!(doc.entries[1].key, "foo");
+    }
 }
