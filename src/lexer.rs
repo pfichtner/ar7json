@@ -607,6 +607,10 @@ impl<'a> Lexer<'a> {
             }
         }
 
+        if self.pos == start {
+            value.push(self.advance() as char);
+        }
+
         // Check for boolean keywords
         let kind = match value.as_str() {
             "yes" => TokenKind::Boolean(true),
