@@ -89,14 +89,17 @@ The lossless JSON format preserves all AR7 syntax distinctions:
   "format": "ar7json",
   "version": 1,
   "document": {
+    "leading_trivia": [],
     "entries": [
       {
         "key": "ar7cfg",
+        "leading_trivia": [],
         "value": {
           "type": "object",
           "entries": [
             {
               "key": "mode",
+              "leading_trivia": [],
               "value": {
                 "type": "identifier",
                 "value": "dsldmode_router"
@@ -104,6 +107,7 @@ The lossless JSON format preserves all AR7 syntax distinctions:
             },
             {
               "key": "igddenabled",
+              "leading_trivia": [],
               "value": {
                 "type": "boolean",
                 "value": false,
@@ -112,6 +116,7 @@ The lossless JSON format preserves all AR7 syntax distinctions:
             },
             {
               "key": "timeout",
+              "leading_trivia": [],
               "value": {
                 "type": "duration",
                 "value": 1,
@@ -122,13 +127,27 @@ The lossless JSON format preserves all AR7 syntax distinctions:
           ]
         }
       }
-    ]
+    ],
+    "trailing_trivia": []
   }
 }
 ```
 
 Value types: `string`, `integer`, `number`, `boolean`, `identifier`, `duration`,
 `ip_address`, `mac_address`, `list`, `object`, `raw`.
+
+Comments and whitespace are preserved as trivia in the JSON output:
+
+```json
+{
+  "leading_trivia": [
+    { "type": "block_comment", "value": "\n * /var/tmp.cfg\n * Thu Jan 1 01:05:57 1970\n " }
+  ],
+  ...
+}
+```
+
+Trivia types: `whitespace`, `line_comment`, `block_comment`.
 
 ## Round-trip Guarantees
 
@@ -141,7 +160,7 @@ acceptable; syntactic/semantic AST differences are not.
 
 ## Limitations
 
-- Comments are not preserved in serialized output (canonical formatting)
+- Comments within list values (between comma-separated items) are not preserved
 - The simplified JSON mode (`--simple`) does not support round-trip conversion
 - Floating-point values with more than 4 dot-separated groups are not recognized as IP
   addresses (by design: the parser is conservative)

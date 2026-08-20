@@ -10,22 +10,22 @@ pub fn serialize(doc: &Document) -> Result<String, Ar7Error> {
 
     // leading trivia
     for t in &doc.leading_trivia {
-        serialize_trivia(&mut output, t)?;
+        match t {
+            Trivia::Whitespace(_) => {}
+            _ => serialize_trivia(&mut output, t)?,
+        }
     }
 
     // entries
-    for (i, entry) in doc.entries.iter().enumerate() {
-        if i > 0 {
-            // blank line between top-level blocks
-            if matches!(entry.value, Value::Object(_)) {
-                output.push('\n');
-            }
-        }
+    for entry in &doc.entries {
         serialize_entry(&mut output, entry, 0)?;
     }
 
     // trailing trivia
     for t in &doc.trailing_trivia {
+        if matches!(t, Trivia::Whitespace(_)) && output.ends_with('\n') {
+            continue;
+        }
         serialize_trivia(&mut output, t)?;
     }
 
@@ -55,6 +55,19 @@ fn serialize_trivia(output: &mut String, trivia: &Trivia) -> Result<(), Ar7Error
 
 fn serialize_entry(output: &mut String, entry: &Entry, depth: usize) -> Result<(), Ar7Error> {
     let indent = repeat_indent(depth);
+
+    for t in &entry.leading_trivia {
+        match t {
+            Trivia::Whitespace(_) => {}
+            Trivia::LineComment(s) => {
+                write!(output, "{}//{}\n", indent, s).unwrap();
+            }
+            Trivia::BlockComment(s) => {
+                write!(output, "{}/*{}*/\n", indent, s).unwrap();
+            }
+        }
+    }
+
     write!(output, "{}{} ", indent, entry.key).unwrap();
 
     match &entry.value {
@@ -64,14 +77,27 @@ fn serialize_entry(output: &mut String, entry: &Entry, depth: usize) -> Result<(
                 serialize_entry(output, e, depth + 1)?;
             }
             write!(output, "{}}}", indent).unwrap();
-            output.push('\n');
         }
         _ => {
             output.push_str("= ");
             serialize_value(output, &entry.value, depth)?;
-            output.push_str(";\n");
+            output.push(';');
         }
     }
+
+    for t in &entry.trailing_trivia {
+        match t {
+            Trivia::Whitespace(_) => {}
+            Trivia::LineComment(s) => {
+                write!(output, " //{}", s).unwrap();
+            }
+            Trivia::BlockComment(s) => {
+                write!(output, " /*{}*/", s).unwrap();
+            }
+        }
+    }
+
+    output.push('\n');
 
     Ok(())
 }

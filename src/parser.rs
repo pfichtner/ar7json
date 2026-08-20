@@ -21,30 +21,19 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_document(&mut self) -> Result<Document, Ar7Error> {
-        let mut leading_trivia = Vec::new();
+        let leading_trivia = self.collect_trivia();
         let mut entries = Vec::new();
-        let mut trailing_trivia = Vec::new();
 
-        // collect leading trivia
-        while let Some(trivia) = self.try_collect_trivia()? {
-            leading_trivia.push(trivia);
-        }
-
-        // parse entries
         while !self.is_at_end() {
-            if let Some(entry) = self.try_parse_entry()? {
-                entries.push(entry);
-            } else if let Some(trivia) = self.try_collect_trivia()? {
-                trailing_trivia.push(trivia);
+            let mut entry = self.try_parse_entry()?;
+            if entry.is_some() {
+                entries.push(entry.take().unwrap());
             } else {
                 break;
             }
         }
 
-        // collect any trailing trivia
-        while let Some(trivia) = self.try_collect_trivia()? {
-            trailing_trivia.push(trivia);
-        }
+        let trailing_trivia = self.collect_trivia();
 
         Ok(Document {
             leading_trivia,
@@ -53,66 +42,108 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn try_collect_trivia(&mut self) -> Result<Option<Trivia>, Ar7Error> {
-        let tok = self.peek();
-        match &tok.kind {
-            TokenKind::Whitespace(s) => {
-                let t = Trivia::Whitespace(s.clone());
-                self.advance();
-                Ok(Some(t))
+    fn collect_trivia(&mut self) -> Vec<Trivia> {
+        let mut trivia = Vec::new();
+        loop {
+            let tok = self.peek();
+            match &tok.kind {
+                TokenKind::Whitespace(s) => {
+                    trivia.push(Trivia::Whitespace(s.clone()));
+                    self.advance();
+                }
+                TokenKind::LineComment(s) => {
+                    trivia.push(Trivia::LineComment(s.clone()));
+                    self.advance();
+                }
+                TokenKind::BlockComment(s) => {
+                    trivia.push(Trivia::BlockComment(s.clone()));
+                    self.advance();
+                }
+                _ => break,
             }
-            TokenKind::LineComment(s) => {
-                let t = Trivia::LineComment(s.clone());
-                self.advance();
-                Ok(Some(t))
-            }
-            TokenKind::BlockComment(s) => {
-                let t = Trivia::BlockComment(s.clone());
-                self.advance();
-                Ok(Some(t))
-            }
-            _ => Ok(None),
         }
+        trivia
+    }
+
+    fn collect_comments(&mut self) -> Vec<Trivia> {
+        let mut trivia = Vec::new();
+        loop {
+            let tok = self.peek();
+            match &tok.kind {
+                TokenKind::LineComment(s) => {
+                    trivia.push(Trivia::LineComment(s.clone()));
+                    self.advance();
+                }
+                TokenKind::BlockComment(s) => {
+                    trivia.push(Trivia::BlockComment(s.clone()));
+                    self.advance();
+                }
+                _ => break,
+            }
+        }
+        trivia
     }
 
     fn try_parse_entry(&mut self) -> Result<Option<Entry>, Ar7Error> {
-        // skip trivia
-        while self.skip_trivia() {}
+        let saved_pos = self.pos;
+        let leading_trivia = self.collect_trivia();
 
         if self.is_at_end() {
+            self.pos = saved_pos;
             return Ok(None);
         }
 
         let key = self.parse_key()?;
         let key_span = self.peek_prev().span;
 
-        // skip trivia after key
-        while self.skip_trivia() {}
+        while self.skip_whitespace() {}
+        let mut trailing_trivia = self.collect_comments();
 
         if self.check(&TokenKind::LBrace) {
-            // block entry: key { ... }
             self.advance(); // consume {
             let value = self.parse_block_entries(None)?;
-            // skip trivia before semicolon (blocks don't have semicolons, but check)
-            while self.skip_trivia() {}
-            // blocks don't end with semicolons
+            while self.skip_whitespace() {}
+            trailing_trivia.extend(self.collect_comments());
             Ok(Some(Entry {
                 key,
                 value,
+                leading_trivia,
+                trailing_trivia,
                 span: Some(key_span),
             }))
         } else if self.check(&TokenKind::Equals) {
             self.advance(); // consume =
-            while self.skip_trivia() {}
+            while self.skip_whitespace() {}
+            trailing_trivia.extend(self.collect_comments());
             let value = self.parse_value()?;
-            while self.skip_trivia() {}
-            // expect semicolon
+            trailing_trivia.extend(self.collect_comments());
+            while self.skip_whitespace() {}
+            trailing_trivia.extend(self.collect_comments());
             if self.check(&TokenKind::Semicolon) {
                 self.advance();
+            }
+            loop {
+                match &self.peek().kind {
+                    TokenKind::Whitespace(s) if !s.contains('\n') => {
+                        trailing_trivia.push(Trivia::Whitespace(s.clone()));
+                        self.advance();
+                    }
+                    TokenKind::LineComment(s) => {
+                        trailing_trivia.push(Trivia::LineComment(s.clone()));
+                        self.advance();
+                    }
+                    TokenKind::BlockComment(s) => {
+                        trailing_trivia.push(Trivia::BlockComment(s.clone()));
+                        self.advance();
+                    }
+                    _ => break,
+                }
             }
             Ok(Some(Entry {
                 key,
                 value,
+                leading_trivia,
+                trailing_trivia,
                 span: Some(key_span),
             }))
         } else {
@@ -149,7 +180,7 @@ impl<'a> Parser<'a> {
             return Err(Ar7Error::general("maximum nesting depth exceeded"));
         }
 
-        while self.skip_trivia() {}
+        while self.skip_whitespace() {}
 
         if self.is_at_end() {
             return Err(self.unexpected_eof(&["value"]));
@@ -222,13 +253,13 @@ impl<'a> Parser<'a> {
 
         // Check for list continuation (comma)
         let mut items = vec![value];
-        while self.skip_trivia() {}
+        while self.skip_whitespace() {}
         while self.check(&TokenKind::Comma) {
             if items.len() >= MAX_LIST_LENGTH {
                 return Err(Ar7Error::general("maximum list length exceeded"));
             }
             self.advance(); // consume comma
-            while self.skip_trivia() {}
+            while self.skip_whitespace() {}
             if self.is_at_end()
                 || self.check(&TokenKind::Semicolon)
                 || self.check(&TokenKind::RBrace)
@@ -237,7 +268,7 @@ impl<'a> Parser<'a> {
             }
             let item = self.parse_single_value(depth)?;
             items.push(item);
-            while self.skip_trivia() {}
+            while self.skip_whitespace() {}
         }
 
         if items.len() == 1 {
@@ -256,7 +287,7 @@ impl<'a> Parser<'a> {
         let mut entries = Vec::new();
 
         loop {
-            while self.skip_trivia() {}
+            let leading_trivia = self.collect_trivia();
 
             if self.is_at_end() {
                 if depth.is_some() {
@@ -270,32 +301,40 @@ impl<'a> Parser<'a> {
                 break;
             }
 
-            // Try to parse an entry inside the block
             let key = self.parse_key()?;
             let key_span = self.peek_prev().span;
 
-            while self.skip_trivia() {}
+            while self.skip_whitespace() {}
+            let mut trailing_trivia = self.collect_comments();
 
             if self.check(&TokenKind::LBrace) {
-                // nested block
                 self.advance(); // consume {
                 let value = self.parse_block_entries(Some(d))?;
+                while self.skip_whitespace() {}
+                trailing_trivia.extend(self.collect_comments());
                 entries.push(Entry {
                     key,
                     value,
+                    leading_trivia,
+                    trailing_trivia,
                     span: Some(key_span),
                 });
             } else if self.check(&TokenKind::Equals) {
                 self.advance(); // consume =
-                while self.skip_trivia() {}
+                while self.skip_whitespace() {}
+                trailing_trivia.extend(self.collect_comments());
                 let value = self.parse_value_with_depth(d)?;
-                while self.skip_trivia() {}
+                trailing_trivia.extend(self.collect_comments());
+                while self.skip_whitespace() {}
+                trailing_trivia.extend(self.collect_comments());
                 if self.check(&TokenKind::Semicolon) {
                     self.advance();
                 }
                 entries.push(Entry {
                     key,
                     value,
+                    leading_trivia,
+                    trailing_trivia,
                     span: Some(key_span),
                 });
             } else {
@@ -339,16 +378,15 @@ impl<'a> Parser<'a> {
         std::mem::discriminant(&self.tokens[self.pos].kind) == std::mem::discriminant(kind)
     }
 
-    fn skip_trivia(&mut self) -> bool {
+    fn skip_whitespace(&mut self) -> bool {
         if self.is_at_end() {
             return false;
         }
-        match &self.tokens[self.pos].kind {
-            TokenKind::Whitespace(_) | TokenKind::LineComment(_) | TokenKind::BlockComment(_) => {
-                self.pos += 1;
-                true
-            }
-            _ => false,
+        if matches!(&self.tokens[self.pos].kind, TokenKind::Whitespace(_)) {
+            self.pos += 1;
+            true
+        } else {
+            false
         }
     }
 
