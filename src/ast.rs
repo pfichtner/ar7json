@@ -46,6 +46,10 @@ pub struct Document {
 pub struct Entry {
     pub key: String,
     pub value: Value,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub leading_trivia: Vec<Trivia>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub trailing_trivia: Vec<Trivia>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub span: Option<Span>,
 }

@@ -158,6 +158,8 @@ fn json_to_entry(value: &JsonValue) -> Result<Entry, Ar7Error> {
     Ok(Entry {
         key,
         value: json_to_value(val)?,
+        leading_trivia: Vec::new(),
+        trailing_trivia: Vec::new(),
         span: None,
     })
 }
