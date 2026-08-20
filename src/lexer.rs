@@ -243,10 +243,13 @@ impl<'a> Lexer<'a> {
                 self.advance();
                 value.push(self.advance() as char);
             } else if ch == b'*' && self.peek() == Some(b'/') {
-                depth -= 1;
-                value.push(ch as char);
                 self.advance();
-                value.push(self.advance() as char);
+                self.advance();
+                depth -= 1;
+                if depth > 0 {
+                    value.push(ch as char);
+                    value.push('/');
+                }
             } else {
                 value.push(ch as char);
                 self.advance();

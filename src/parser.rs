@@ -288,7 +288,7 @@ impl<'a> Parser<'a> {
             return Err(Ar7Error::general("maximum nesting depth exceeded"));
         }
 
-        let mut entries = Vec::new();
+        let mut entries: Vec<Entry> = Vec::new();
 
         loop {
             let leading_trivia = self.collect_trivia();
@@ -301,6 +301,11 @@ impl<'a> Parser<'a> {
             }
 
             if self.check(&TokenKind::RBrace) {
+                if !leading_trivia.is_empty() {
+                    if let Some(last) = entries.last_mut() {
+                        last.trailing_trivia.extend(leading_trivia);
+                    }
+                }
                 self.advance(); // consume }
                 break;
             }

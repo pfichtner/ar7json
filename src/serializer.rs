@@ -43,11 +43,17 @@ fn serialize_trivia(output: &mut String, trivia: &Trivia) -> Result<(), Ar7Error
         Trivia::LineComment(s) => {
             output.push_str("//");
             output.push_str(s);
+            if !s.ends_with('\n') {
+                output.push('\n');
+            }
         }
         Trivia::BlockComment(s) => {
             output.push_str("/*");
             output.push_str(s);
             output.push_str("*/");
+            if !s.ends_with('\n') {
+                output.push('\n');
+            }
         }
     }
     Ok(())
