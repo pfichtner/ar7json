@@ -7,25 +7,49 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Run tests
+        run: cargo test
 
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            artifact: ar7json-linux-amd64
+          - target: aarch64-unknown-linux-gnu
+            artifact: ar7json-linux-arm64
+          - target: armv7-unknown-linux-gnueabihf
+            artifact: ar7json-linux-armv7
+          - target: x86_64-unknown-linux-musl
+            artifact: ar7json-linux-amd64-musl
     steps:
       - uses: actions/checkout@v4
 
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
 
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
 
-      - name: Run tests
-        run: cargo test
+      - name: Install cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
 
       - name: Build release binary
-        run: cargo build --release
+        run: cross build --release --target ${{ matrix.target }}
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: ar7json-linux-amd64
-          path: target/release/ar7json
+          name: ${{ matrix.artifact }}
+          path: target/${{ matrix.target }}/release/ar7json
           retention-days: 14
