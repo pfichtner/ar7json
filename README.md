@@ -9,7 +9,9 @@ files (`ar7.cfg`) contain nested blocks, key-value assignments, and values in va
 formats (strings, integers, booleans, durations, identifiers, IP addresses, etc.).
 
 This tool converts AR7 configuration files to a lossless JSON representation and back,
-preserving all syntax distinctions and supporting arbitrary/unknown AVM configuration keys.
+preserving value types and supporting arbitrary/unknown AVM configuration keys.
+Comments and original formatting are preserved by the `format` command, but not
+carried through the JSON representation (see [Limitations](#limitations)).
 
 ## Motivation
 
@@ -89,26 +91,25 @@ cat config.ar7 | ar7json to-json | ar7json to-ar7 > config.roundtrip.ar7
 ar7json to-json --simple config.ar7
 ```
 
+Produces a plain nested-object representation (`{"ar7cfg": {"mode": "..."}}`). This is a
+one-way export: type tags and raw source text are discarded, so `to-ar7` rejects this
+output. Use it for inspection, diffing, or querying with tools like `jq`.
+
 ## JSON Format
 
-The lossless JSON format preserves all AR7 syntax distinctions:
+The lossless JSON format preserves all AR7 value types and their exact source text
+(`raw`), so AR7 can be reconstructed without loss:
 
 ```json
 {
-  "format": "ar7json",
-  "version": 1,
   "document": {
-    "leading_trivia": [],
     "entries": [
       {
         "key": "ar7cfg",
-        "leading_trivia": [],
         "value": {
-          "type": "object",
           "entries": [
             {
               "key": "mode",
-              "leading_trivia": [],
               "value": {
                 "type": "identifier",
                 "value": "dsldmode_router"
@@ -116,60 +117,61 @@ The lossless JSON format preserves all AR7 syntax distinctions:
             },
             {
               "key": "igddenabled",
-              "leading_trivia": [],
               "value": {
+                "raw": "no",
                 "type": "boolean",
-                "value": false,
-                "raw": "no"
+                "value": false
               }
             },
             {
               "key": "timeout",
-              "leading_trivia": [],
               "value": {
+                "raw": "1m",
                 "type": "duration",
-                "value": 1,
                 "unit": "m",
-                "raw": "1m"
+                "value": 1
               }
             }
-          ]
+          ],
+          "type": "object"
         }
       }
-    ],
-    "trailing_trivia": []
-  }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
 }
 ```
 
 Value types: `string`, `integer`, `number`, `boolean`, `identifier`, `duration`,
 `ip_address`, `mac_address`, `list`, `object`, `raw`.
 
-Comments and whitespace are preserved as trivia in the JSON output:
-
-```json
-{
-  "leading_trivia": [
-    { "type": "block_comment", "value": "\n * /var/tmp.cfg\n * Thu Jan 1 01:05:57 1970\n " }
-  ],
-  ...
-}
-```
-
-Trivia types: `whitespace`, `line_comment`, `block_comment`.
+Comments and whitespace are **not** represented in the JSON output: `to-json` drops
+them. Use the `format` command instead if you need to preserve comments.
 
 ## Round-trip Guarantees
 
 ```
-AR7 → AST → JSON → AST → AR7' → AST' = AST
+AR7 → AST → JSON → AST → AR7' → AST' = AST   (structure and values)
+```
+
+Structure and values survive the JSON round-trip exactly; comments and whitespace
+trivia do not (they are dropped by `to-json`). The `format` command operates directly
+on the AST and preserves comments:
+
+```
+AR7 → format → AR7'   (comments preserved)
 ```
 
 The parser produces deterministic output. Whitespace differences in serialization are
-acceptable; syntactic/semantic AST differences are not.
+acceptable; syntactic/semantic differences other than lost trivia are not.
 
 ## Limitations
 
-- Comments within list values (between comma-separated items) are not preserved
+- Comments and whitespace are lost when converting through JSON (`to-json` →
+  `to-ar7`); use `format` to preserve them
+- Comments within list values (between comma-separated items) are rejected as syntax
+  errors by the parser
 - The simplified JSON mode (`--simple`) does not support round-trip conversion
 - Floating-point values with more than 4 dot-separated groups are not recognized as IP
   addresses (by design: the parser is conservative)
