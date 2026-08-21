@@ -1,0 +1,19 @@
+# `check` on valid files; success message goes to stderr.
+
+```console
+$ ar7json check tests/fixtures/minimal.ar7
+ar7json: OK
+
+```
+
+```console
+$ ar7json check tests/fixtures/nested.ar7
+ar7json: OK
+
+```
+
+```console
+$ ar7json check tests/fixtures/real-world/real01.ar7
+ar7json: OK
+
+```

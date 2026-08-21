@@ -183,6 +183,22 @@ acceptable; syntactic/semantic differences other than lost trivia are not.
 - No shell expansion, variable resolution, or network access
 - Credential values in configurations are not logged by default
 
+## Development
+
+The CLI has byte-exact golden tests powered by [trycmd](https://docs.rs/trycmd) in
+`tests/cmd/*.trycmd` and `tests/cmd/*.toml`. They pin the exact stdout/stderr of
+`to-json`, `format`, `to-json --simple`, `check`, and stdin piping for every fixture.
+
+```bash
+cargo test --test cli                          # run golden tests
+TRYCMD=overwrite cargo test --test cli         # update goldens after an intentional change
+TRYCMD=dump cargo test --test cli              # write actual output to dump/ for inspection
+```
+
+Review every regenerated golden diff before committing it. Note that trycmd normalizes
+path separators, so backslashes in expected output are rendered as `/` inside the
+golden files; this is a display/normalization convention, not the program's output.
+
 ## License
 
 MIT

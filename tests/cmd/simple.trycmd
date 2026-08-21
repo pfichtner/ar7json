@@ -1,0 +1,67 @@
+# Simplified (lossy) JSON mode.
+
+```console
+$ ar7json to-json --simple tests/fixtures/nested.ar7
+{
+  "ar7cfg": {
+    "active_name": "",
+    "active_provider": "other",
+    "hsi_vlancfg": {
+      "vlanid": 0,
+      "vlanprio": 0
+    },
+    "igddenabled": true,
+    "mode": "dsldmode_router",
+    "mtu_cutback": 1500,
+    "serialcfg": {
+      "backup": {
+        "downtime": "3m",
+        "enabled": false,
+        "reverttime": "30m"
+      },
+      "inactivity_timeout": "1m",
+      "number": "*99#"
+    }
+  },
+  "meta": {
+    "encoding": "utf-8"
+  }
+}
+
+```
+
+```console
+$ ar7json to-json --simple tests/fixtures/real-world/real01.ar7
+{
+  "ar7cfg": {
+    "active_name": "",
+    "active_provider": "tonline",
+    "hsi_vlancfg": {
+      "tagtype": "vlantagtype_customer",
+      "tos": 0,
+      "vlanencap": "vlanencap_none",
+      "vlanid": 0,
+      "vlanprio": 0
+    },
+    "igddenabled": false,
+    "mode": "dsldmode_router",
+    "serialcfg": {
+      "backup": {
+        "downtime": "3m",
+        "enabled": false,
+        "quickstart": "serialquickstart_off",
+        "reverttime": "30m"
+      },
+      "inactivity_timeout": "1m",
+      "mode": "serialmode_off",
+      "number": "*99#"
+    },
+    "wan_bridge_gateway": "0.0.0.0",
+    "wan_bridge_with_dhcpc": true
+  },
+  "meta": {
+    "encoding": "utf-8"
+  }
+}
+
+```

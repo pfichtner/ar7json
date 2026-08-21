@@ -1,0 +1,25 @@
+meta { encoding = "utf-8"; }
+
+ar7cfg {
+    mode = dsldmode_router;
+    active_provider = "other";
+    active_name = "";
+    igddenabled = yes;
+    mtu_cutback = 1500;
+
+    hsi_vlancfg {
+        vlanid = 0;
+        vlanprio = 0;
+    }
+
+    serialcfg {
+        number = "*99#";
+        inactivity_timeout = 1m;
+
+        backup {
+            enabled = no;
+            downtime = 3m;
+            reverttime = 30m;
+        }
+    }
+}

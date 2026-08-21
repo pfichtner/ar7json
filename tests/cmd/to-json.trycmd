@@ -1,0 +1,1230 @@
+# Byte-exact goldens for `to-json` over all fixtures.
+
+```console
+$ ar7json to-json tests/fixtures/minimal.ar7
+{
+  "document": {
+    "entries": [
+      {
+        "key": "meta",
+        "value": {
+          "entries": [
+            {
+              "key": "encoding",
+              "value": {
+                "raw": "/"utf-8/"",
+                "type": "string",
+                "value": "utf-8"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
+}
+
+```
+
+```console
+$ ar7json to-json tests/fixtures/nested.ar7
+{
+  "document": {
+    "entries": [
+      {
+        "key": "meta",
+        "value": {
+          "entries": [
+            {
+              "key": "encoding",
+              "value": {
+                "raw": "/"utf-8/"",
+                "type": "string",
+                "value": "utf-8"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "key": "ar7cfg",
+        "value": {
+          "entries": [
+            {
+              "key": "mode",
+              "value": {
+                "type": "identifier",
+                "value": "dsldmode_router"
+              }
+            },
+            {
+              "key": "active_provider",
+              "value": {
+                "raw": "/"other/"",
+                "type": "string",
+                "value": "other"
+              }
+            },
+            {
+              "key": "active_name",
+              "value": {
+                "raw": "/"/"",
+                "type": "string",
+                "value": ""
+              }
+            },
+            {
+              "key": "igddenabled",
+              "value": {
+                "raw": "yes",
+                "type": "boolean",
+                "value": true
+              }
+            },
+            {
+              "key": "mtu_cutback",
+              "value": {
+                "raw": "1500",
+                "type": "integer",
+                "value": 1500
+              }
+            },
+            {
+              "key": "hsi_vlancfg",
+              "value": {
+                "entries": [
+                  {
+                    "key": "vlanid",
+                    "value": {
+                      "raw": "0",
+                      "type": "integer",
+                      "value": 0
+                    }
+                  },
+                  {
+                    "key": "vlanprio",
+                    "value": {
+                      "raw": "0",
+                      "type": "integer",
+                      "value": 0
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            },
+            {
+              "key": "serialcfg",
+              "value": {
+                "entries": [
+                  {
+                    "key": "number",
+                    "value": {
+                      "raw": "/"*99#/"",
+                      "type": "string",
+                      "value": "*99#"
+                    }
+                  },
+                  {
+                    "key": "inactivity_timeout",
+                    "value": {
+                      "raw": "1m",
+                      "type": "duration",
+                      "unit": "m",
+                      "value": 1
+                    }
+                  },
+                  {
+                    "key": "backup",
+                    "value": {
+                      "entries": [
+                        {
+                          "key": "enabled",
+                          "value": {
+                            "raw": "no",
+                            "type": "boolean",
+                            "value": false
+                          }
+                        },
+                        {
+                          "key": "downtime",
+                          "value": {
+                            "raw": "3m",
+                            "type": "duration",
+                            "unit": "m",
+                            "value": 3
+                          }
+                        },
+                        {
+                          "key": "reverttime",
+                          "value": {
+                            "raw": "30m",
+                            "type": "duration",
+                            "unit": "m",
+                            "value": 30
+                          }
+                        }
+                      ],
+                      "type": "object"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
+}
+
+```
+
+```console
+$ ar7json to-json tests/fixtures/strings.ar7
+{
+  "document": {
+    "entries": [
+      {
+        "key": "strings_test",
+        "value": {
+          "entries": [
+            {
+              "key": "simple",
+              "value": {
+                "raw": "/"hello world/"",
+                "type": "string",
+                "value": "hello world"
+              }
+            },
+            {
+              "key": "escaped_quote",
+              "value": {
+                "raw": "/"foo ///"bar///"/"",
+                "type": "string",
+                "value": "foo /"bar/""
+              }
+            },
+            {
+              "key": "escaped_backslash",
+              "value": {
+                "raw": "/"C:////foo////bar/"",
+                "type": "string",
+                "value": "C:////foo////bar"
+              }
+            },
+            {
+              "key": "empty",
+              "value": {
+                "raw": "/"/"",
+                "type": "string",
+                "value": ""
+              }
+            },
+            {
+              "key": "newline",
+              "value": {
+                "raw": "/"line1//nline2/"",
+                "type": "string",
+                "value": "line1//nline2"
+              }
+            },
+            {
+              "key": "tab",
+              "value": {
+                "raw": "/"col1//tcol2/"",
+                "type": "string",
+                "value": "col1//tcol2"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
+}
+
+```
+
+```console
+$ ar7json to-json tests/fixtures/lists.ar7
+{
+  "document": {
+    "entries": [
+      {
+        "key": "lists_test",
+        "value": {
+          "entries": [
+            {
+              "key": "single",
+              "value": {
+                "raw": "/"only/"",
+                "type": "string",
+                "value": "only"
+              }
+            },
+            {
+              "key": "short",
+              "value": {
+                "items": [
+                  {
+                    "raw": "/"a/"",
+                    "type": "string",
+                    "value": "a"
+                  },
+                  {
+                    "raw": "/"b/"",
+                    "type": "string",
+                    "value": "b"
+                  },
+                  {
+                    "raw": "/"c/"",
+                    "type": "string",
+                    "value": "c"
+                  }
+                ],
+                "type": "list"
+              }
+            },
+            {
+              "key": "integers",
+              "value": {
+                "items": [
+                  {
+                    "raw": "1",
+                    "type": "integer",
+                    "value": 1
+                  },
+                  {
+                    "raw": "2",
+                    "type": "integer",
+                    "value": 2
+                  },
+                  {
+                    "raw": "3",
+                    "type": "integer",
+                    "value": 3
+                  }
+                ],
+                "type": "list"
+              }
+            },
+            {
+              "key": "mixed",
+              "value": {
+                "items": [
+                  {
+                    "raw": "/"text/"",
+                    "type": "string",
+                    "value": "text"
+                  },
+                  {
+                    "raw": "42",
+                    "type": "integer",
+                    "value": 42
+                  },
+                  {
+                    "raw": "yes",
+                    "type": "boolean",
+                    "value": true
+                  }
+                ],
+                "type": "list"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
+}
+
+```
+
+```console
+$ ar7json to-json tests/fixtures/durations.ar7
+{
+  "document": {
+    "entries": [
+      {
+        "key": "durations_test",
+        "value": {
+          "entries": [
+            {
+              "key": "milliseconds",
+              "value": {
+                "raw": "500ms",
+                "type": "duration",
+                "unit": "ms",
+                "value": 500
+              }
+            },
+            {
+              "key": "seconds",
+              "value": {
+                "raw": "30s",
+                "type": "duration",
+                "unit": "s",
+                "value": 30
+              }
+            },
+            {
+              "key": "minutes",
+              "value": {
+                "raw": "5m",
+                "type": "duration",
+                "unit": "m",
+                "value": 5
+              }
+            },
+            {
+              "key": "hours",
+              "value": {
+                "raw": "2h",
+                "type": "duration",
+                "unit": "h",
+                "value": 2
+              }
+            },
+            {
+              "key": "days",
+              "value": {
+                "raw": "7d",
+                "type": "duration",
+                "unit": "d",
+                "value": 7
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
+}
+
+```
+
+```console
+$ ar7json to-json tests/fixtures/real-world/real01.ar7
+{
+  "document": {
+    "entries": [
+      {
+        "key": "meta",
+        "value": {
+          "entries": [
+            {
+              "key": "encoding",
+              "value": {
+                "raw": "/"utf-8/"",
+                "type": "string",
+                "value": "utf-8"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "key": "ar7cfg",
+        "value": {
+          "entries": [
+            {
+              "key": "mode",
+              "value": {
+                "type": "identifier",
+                "value": "dsldmode_router"
+              }
+            },
+            {
+              "key": "active_provider",
+              "value": {
+                "raw": "/"tonline/"",
+                "type": "string",
+                "value": "tonline"
+              }
+            },
+            {
+              "key": "active_name",
+              "value": {
+                "raw": "/"/"",
+                "type": "string",
+                "value": ""
+              }
+            },
+            {
+              "key": "igddenabled",
+              "value": {
+                "raw": "no",
+                "type": "boolean",
+                "value": false
+              }
+            },
+            {
+              "key": "wan_bridge_with_dhcpc",
+              "value": {
+                "raw": "yes",
+                "type": "boolean",
+                "value": true
+              }
+            },
+            {
+              "key": "wan_bridge_gateway",
+              "value": {
+                "raw": "0.0.0.0",
+                "type": "number",
+                "value": "0.0.0.0"
+              }
+            },
+            {
+              "key": "hsi_vlancfg",
+              "value": {
+                "entries": [
+                  {
+                    "key": "vlanencap",
+                    "value": {
+                      "type": "identifier",
+                      "value": "vlanencap_none"
+                    }
+                  },
+                  {
+                    "key": "tagtype",
+                    "value": {
+                      "type": "identifier",
+                      "value": "vlantagtype_customer"
+                    }
+                  },
+                  {
+                    "key": "vlanid",
+                    "value": {
+                      "raw": "0",
+                      "type": "integer",
+                      "value": 0
+                    }
+                  },
+                  {
+                    "key": "vlanprio",
+                    "value": {
+                      "raw": "0",
+                      "type": "integer",
+                      "value": 0
+                    }
+                  },
+                  {
+                    "key": "tos",
+                    "value": {
+                      "raw": "0",
+                      "type": "integer",
+                      "value": 0
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            },
+            {
+              "key": "serialcfg",
+              "value": {
+                "entries": [
+                  {
+                    "key": "mode",
+                    "value": {
+                      "type": "identifier",
+                      "value": "serialmode_off"
+                    }
+                  },
+                  {
+                    "key": "number",
+                    "value": {
+                      "raw": "/"*99#/"",
+                      "type": "string",
+                      "value": "*99#"
+                    }
+                  },
+                  {
+                    "key": "inactivity_timeout",
+                    "value": {
+                      "raw": "1m",
+                      "type": "duration",
+                      "unit": "m",
+                      "value": 1
+                    }
+                  },
+                  {
+                    "key": "backup",
+                    "value": {
+                      "entries": [
+                        {
+                          "key": "enabled",
+                          "value": {
+                            "raw": "no",
+                            "type": "boolean",
+                            "value": false
+                          }
+                        },
+                        {
+                          "key": "quickstart",
+                          "value": {
+                            "type": "identifier",
+                            "value": "serialquickstart_off"
+                          }
+                        },
+                        {
+                          "key": "downtime",
+                          "value": {
+                            "raw": "3m",
+                            "type": "duration",
+                            "unit": "m",
+                            "value": 3
+                          }
+                        },
+                        {
+                          "key": "reverttime",
+                          "value": {
+                            "raw": "30m",
+                            "type": "duration",
+                            "unit": "m",
+                            "value": 30
+                          }
+                        }
+                      ],
+                      "type": "object"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
+}
+
+```
+
+```console
+$ ar7json to-json tests/fixtures/real-world/real02.ar7
+{
+  "document": {
+    "entries": [
+      {
+        "key": "meta",
+        "value": {
+          "entries": [
+            {
+              "key": "encoding",
+              "value": {
+                "raw": "/"utf-8/"",
+                "type": "string",
+                "value": "utf-8"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      },
+      {
+        "key": "ar7cfg",
+        "value": {
+          "entries": [
+            {
+              "key": "mode",
+              "value": {
+                "type": "identifier",
+                "value": "dsldmode_router"
+              }
+            },
+            {
+              "key": "active_provider",
+              "value": {
+                "raw": "/"other/"",
+                "type": "string",
+                "value": "other"
+              }
+            },
+            {
+              "key": "active_name",
+              "value": {
+                "raw": "/"/"",
+                "type": "string",
+                "value": ""
+              }
+            },
+            {
+              "key": "igddenabled",
+              "value": {
+                "raw": "yes",
+                "type": "boolean",
+                "value": true
+              }
+            },
+            {
+              "key": "wan_bridge_gateway",
+              "value": {
+                "raw": "0.0.0.0",
+                "type": "number",
+                "value": "0.0.0.0"
+              }
+            },
+            {
+              "key": "hsi_vlancfg",
+              "value": {
+                "entries": [
+                  {
+                    "key": "vlanencap",
+                    "value": {
+                      "type": "identifier",
+                      "value": "vlanencap_none"
+                    }
+                  },
+                  {
+                    "key": "vlanid",
+                    "value": {
+                      "raw": "0",
+                      "type": "integer",
+                      "value": 0
+                    }
+                  },
+                  {
+                    "key": "vlanprio",
+                    "value": {
+                      "raw": "0",
+                      "type": "integer",
+                      "value": 0
+                    }
+                  },
+                  {
+                    "key": "tos",
+                    "value": {
+                      "raw": "0",
+                      "type": "integer",
+                      "value": 0
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            },
+            {
+              "key": "serialcfg",
+              "value": {
+                "entries": [
+                  {
+                    "key": "mode",
+                    "value": {
+                      "type": "identifier",
+                      "value": "serialmode_off"
+                    }
+                  },
+                  {
+                    "key": "number",
+                    "value": {
+                      "raw": "/"*99#/"",
+                      "type": "string",
+                      "value": "*99#"
+                    }
+                  },
+                  {
+                    "key": "inactivity_timeout",
+                    "value": {
+                      "raw": "1m",
+                      "type": "duration",
+                      "unit": "m",
+                      "value": 1
+                    }
+                  },
+                  {
+                    "key": "backup",
+                    "value": {
+                      "entries": [
+                        {
+                          "key": "enabled",
+                          "value": {
+                            "raw": "no",
+                            "type": "boolean",
+                            "value": false
+                          }
+                        },
+                        {
+                          "key": "downtime",
+                          "value": {
+                            "raw": "3m",
+                            "type": "duration",
+                            "unit": "m",
+                            "value": 3
+                          }
+                        },
+                        {
+                          "key": "reverttime",
+                          "value": {
+                            "raw": "30m",
+                            "type": "duration",
+                            "unit": "m",
+                            "value": 30
+                          }
+                        }
+                      ],
+                      "type": "object"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
+}
+
+```
+
+```console
+$ ar7json to-json tests/fixtures/real-world/real03.ar7
+{
+  "document": {
+    "entries": [
+      {
+        "key": "future_config",
+        "value": {
+          "entries": [
+            {
+              "key": "new_option",
+              "value": {
+                "type": "identifier",
+                "value": "new_value"
+              }
+            },
+            {
+              "key": "another",
+              "value": {
+                "raw": "42",
+                "type": "integer",
+                "value": 42
+              }
+            },
+            {
+              "key": "flag",
+              "value": {
+                "raw": "yes",
+                "type": "boolean",
+                "value": true
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
+}
+
+```
+
+```console
+$ ar7json to-json tests/fixtures/real-world/real04.ar7
+{
+  "document": {
+    "entries": [
+      {
+        "key": "complex",
+        "value": {
+          "entries": [
+            {
+              "key": "duplicate",
+              "value": {
+                "raw": "1",
+                "type": "integer",
+                "value": 1
+              }
+            },
+            {
+              "key": "duplicate",
+              "value": {
+                "raw": "2",
+                "type": "integer",
+                "value": 2
+              }
+            },
+            {
+              "key": "duplicate",
+              "value": {
+                "raw": "/"three/"",
+                "type": "string",
+                "value": "three"
+              }
+            },
+            {
+              "key": "numbers",
+              "value": {
+                "entries": [
+                  {
+                    "key": "int_val",
+                    "value": {
+                      "raw": "42",
+                      "type": "integer",
+                      "value": 42
+                    }
+                  },
+                  {
+                    "key": "neg_val",
+                    "value": {
+                      "raw": "-7",
+                      "type": "integer",
+                      "value": -7
+                    }
+                  },
+                  {
+                    "key": "float_val",
+                    "value": {
+                      "raw": "3.14",
+                      "type": "number",
+                      "value": "3.14"
+                    }
+                  },
+                  {
+                    "key": "zero",
+                    "value": {
+                      "raw": "0",
+                      "type": "integer",
+                      "value": 0
+                    }
+                  },
+                  {
+                    "key": "leading_zero",
+                    "value": {
+                      "raw": "001",
+                      "type": "integer",
+                      "value": 1
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            },
+            {
+              "key": "addrs",
+              "value": {
+                "entries": [
+                  {
+                    "key": "ip",
+                    "value": {
+                      "raw": "192.168.178.1",
+                      "type": "number",
+                      "value": "192.168.178.1"
+                    }
+                  },
+                  {
+                    "key": "ip2",
+                    "value": {
+                      "raw": "10.0.0.1",
+                      "type": "number",
+                      "value": "10.0.0.1"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            },
+            {
+              "key": "lists",
+              "value": {
+                "entries": [
+                  {
+                    "key": "empty_list",
+                    "value": {
+                      "items": [],
+                      "type": "list"
+                    }
+                  },
+                  {
+                    "key": "one_item",
+                    "value": {
+                      "raw": "/"only/"",
+                      "type": "string",
+                      "value": "only"
+                    }
+                  },
+                  {
+                    "key": "two_items",
+                    "value": {
+                      "items": [
+                        {
+                          "raw": "/"a/"",
+                          "type": "string",
+                          "value": "a"
+                        },
+                        {
+                          "raw": "/"b/"",
+                          "type": "string",
+                          "value": "b"
+                        }
+                      ],
+                      "type": "list"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
+}
+
+```
+
+```console
+$ ar7json to-json tests/fixtures/real-world/real05.ar7
+{
+  "document": {
+    "entries": [
+      {
+        "key": "edge_cases",
+        "value": {
+          "entries": [
+            {
+              "key": "empty_string",
+              "value": {
+                "raw": "/"/"",
+                "type": "string",
+                "value": ""
+              }
+            },
+            {
+              "key": "single_char",
+              "value": {
+                "raw": "/"x/"",
+                "type": "string",
+                "value": "x"
+              }
+            },
+            {
+              "key": "negative_int",
+              "value": {
+                "raw": "-42",
+                "type": "integer",
+                "value": -42
+              }
+            },
+            {
+              "key": "zero",
+              "value": {
+                "raw": "0",
+                "type": "integer",
+                "value": 0
+              }
+            },
+            {
+              "key": "large_int",
+              "value": {
+                "raw": "999999",
+                "type": "integer",
+                "value": 999999
+              }
+            },
+            {
+              "key": "ip_addr",
+              "value": {
+                "raw": "192.168.178.1",
+                "type": "number",
+                "value": "192.168.178.1"
+              }
+            },
+            {
+              "key": "ip_loopback",
+              "value": {
+                "raw": "127.0.0.1",
+                "type": "number",
+                "value": "127.0.0.1"
+              }
+            },
+            {
+              "key": "floating",
+              "value": {
+                "raw": "3.14",
+                "type": "number",
+                "value": "3.14"
+              }
+            },
+            {
+              "key": "neg_float",
+              "value": {
+                "raw": "-0.5",
+                "type": "number",
+                "value": "-0.5"
+              }
+            },
+            {
+              "key": "duration_ms",
+              "value": {
+                "raw": "500ms",
+                "type": "duration",
+                "unit": "ms",
+                "value": 500
+              }
+            },
+            {
+              "key": "duration_sec",
+              "value": {
+                "raw": "30s",
+                "type": "duration",
+                "unit": "s",
+                "value": 30
+              }
+            },
+            {
+              "key": "duration_min",
+              "value": {
+                "raw": "5m",
+                "type": "duration",
+                "unit": "m",
+                "value": 5
+              }
+            },
+            {
+              "key": "duration_hour",
+              "value": {
+                "raw": "2h",
+                "type": "duration",
+                "unit": "h",
+                "value": 2
+              }
+            },
+            {
+              "key": "duration_day",
+              "value": {
+                "raw": "7d",
+                "type": "duration",
+                "unit": "d",
+                "value": 7
+              }
+            },
+            {
+              "key": "bool_yes",
+              "value": {
+                "raw": "yes",
+                "type": "boolean",
+                "value": true
+              }
+            },
+            {
+              "key": "bool_no",
+              "value": {
+                "raw": "no",
+                "type": "boolean",
+                "value": false
+              }
+            },
+            {
+              "key": "dotted_ident",
+              "value": {
+                "type": "identifier",
+                "value": "foo.bar.baz"
+              }
+            },
+            {
+              "key": "hyphen_ident",
+              "value": {
+                "type": "identifier",
+                "value": "foo-bar"
+              }
+            },
+            {
+              "key": "colon_ident",
+              "value": {
+                "type": "mac_address",
+                "value": "ab:cd:ef:01:23:45"
+              }
+            },
+            {
+              "key": "empty_block",
+              "value": {
+                "entries": [],
+                "type": "object"
+              }
+            },
+            {
+              "key": "nested_deep",
+              "value": {
+                "entries": [
+                  {
+                    "key": "a",
+                    "value": {
+                      "entries": [
+                        {
+                          "key": "b",
+                          "value": {
+                            "entries": [
+                              {
+                                "key": "c",
+                                "value": {
+                                  "entries": [
+                                    {
+                                      "key": "d",
+                                      "value": {
+                                        "raw": "1",
+                                        "type": "integer",
+                                        "value": 1
+                                      }
+                                    }
+                                  ],
+                                  "type": "object"
+                                }
+                              }
+                            ],
+                            "type": "object"
+                          }
+                        }
+                      ],
+                      "type": "object"
+                    }
+                  }
+                ],
+                "type": "object"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
+}
+
+```

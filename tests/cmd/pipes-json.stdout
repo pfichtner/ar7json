@@ -1,0 +1,24 @@
+{
+  "document": {
+    "entries": [
+      {
+        "key": "meta",
+        "value": {
+          "entries": [
+            {
+              "key": "encoding",
+              "value": {
+                "raw": "/"utf-8/"",
+                "type": "string",
+                "value": "utf-8"
+              }
+            }
+          ],
+          "type": "object"
+        }
+      }
+    ]
+  },
+  "format": "ar7json",
+  "version": 1
+}
