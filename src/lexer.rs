@@ -116,9 +116,17 @@ impl<'a> Lexer<'a> {
                 b',' => self.add_token(TokenKind::Comma, 1),
                 b';' => self.add_token(TokenKind::Semicolon, 1),
                 b'"' => self.read_string()?,
-                b'0'..=b'9' | b'-' => self.read_number_or_duration()?,
+                b'0'..=b'9' | b'-' => {
+                    if self.looks_like_mac_from_start() {
+                        self.read_identifier()?;
+                    } else if self.looks_like_ipv6_from_start() {
+                        self.read_identifier()?;
+                    } else {
+                        self.read_number_or_duration()?;
+                    }
+                }
                 b'A'..=b'Z' | b'a'..=b'z' | b'_' => self.read_identifier()?,
-                b':' if self.looks_like_mac_address() => self.read_mac_or_ip()?,
+                b':' => self.read_identifier()?,
                 _ => {
                     if ch.is_ascii_graphic() || ch == b' ' {
                         self.read_identifier()?;
@@ -304,53 +312,11 @@ impl<'a> Lexer<'a> {
                         column: self.column - 1,
                     });
                 }
-                let esc = self.advance();
-                raw.push(esc as char);
-                match esc {
-                    b'"' => value.push('"'),
-                    b'\\' => value.push('\\'),
-                    b'n' => value.push('\n'),
-                    b'r' => value.push('\r'),
-                    b't' => value.push('\t'),
-                    b'b' => value.push('\x08'),
-                    b'f' => value.push('\x0C'),
-                    b'/' => value.push('/'),
-                    b'x' => {
-                        let hex1 = self.expect_hex()?;
-                        let hex2 = self.expect_hex()?;
-                        let byte_val = u8::from_str_radix(&format!("{}{}", hex1, hex2), 16)
-                            .map_err(|_| LexerError::InvalidHexEscape {
-                                position: self.pos - 2,
-                                line: self.line,
-                                column: self.column - 2,
-                            })?;
-                        value.push(byte_val as char);
-                    }
-                    b'u' => {
-                        let h1 = self.expect_hex()?;
-                        let h2 = self.expect_hex()?;
-                        let h3 = self.expect_hex()?;
-                        let h4 = self.expect_hex()?;
-                        let cp = u32::from_str_radix(&format!("{}{}{}{}", h1, h2, h3, h4), 16)
-                            .map_err(|_| LexerError::InvalidUnicodeEscape {
-                                position: self.pos - 4,
-                                line: self.line,
-                                column: self.column - 4,
-                            })?;
-                        if let Some(c) = char::from_u32(cp) {
-                            value.push(c);
-                        } else {
-                            return Err(LexerError::InvalidUnicodeEscape {
-                                position: self.pos - 4,
-                                line: self.line,
-                                column: self.column - 4,
-                            });
-                        }
-                    }
-                    _ => {
-                        value.push('\\');
-                        value.push(esc as char);
-                    }
+                if self.current_byte() == b'"' {
+                    raw.push(self.advance() as char);
+                    value.push('"');
+                } else {
+                    value.push('\\');
                 }
             } else {
                 let (c, len) = decode_utf8_char(&self.input[self.pos..]);
@@ -369,27 +335,6 @@ impl<'a> Lexer<'a> {
         });
 
         Ok(())
-    }
-
-    fn expect_hex(&mut self) -> Result<char, LexerError> {
-        if self.pos >= self.input.len() {
-            return Err(LexerError::UnexpectedEof {
-                position: self.pos,
-                line: self.line,
-                column: self.column,
-            });
-        }
-        let ch = self.advance();
-        if ch.is_ascii_hexdigit() {
-            Ok(ch as char)
-        } else {
-            Err(LexerError::UnexpectedByte {
-                byte: ch,
-                position: self.pos - 1,
-                line: self.line,
-                column: self.column - 1,
-            })
-        }
     }
 
     fn read_number_or_duration(&mut self) -> Result<(), LexerError> {
@@ -467,8 +412,8 @@ impl<'a> Lexer<'a> {
                 });
                 return Ok(());
             }
-            // single-char units: s, m, h, d
-            if matches!(ch, b'm' | b's' | b'h' | b'd')
+            // single-char units: s, m, h, d, w
+            if matches!(ch, b'm' | b's' | b'h' | b'd' | b'w')
                 && (self.pos + 1 >= self.input.len() || !is_ident_part(self.input[self.pos + 1]))
             {
                 let unit = (ch as char).to_string();
@@ -577,19 +522,40 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    fn looks_like_mac_address(&self) -> bool {
-        // MAC address is hex:hex:hex:hex:hex:hex
-        // We're at a ':' which would be weird in other contexts
-        // But actually, MAC addresses start with hex, not ':'
-        // This function checks if we're at a position that could be part of MAC
-        false
+    fn looks_like_mac_from_start(&self) -> bool {
+        // Check if current position starts a MAC address: hexhex:hexhex:hexhex:hexhex:hexhex:hexhex
+        let mut p = self.pos;
+        for group in 0..6u32 {
+            // Need two hex digits
+            if p + 1 >= self.input.len() {
+                return false;
+            }
+            if !self.input[p].is_ascii_hexdigit() || !self.input[p + 1].is_ascii_hexdigit() {
+                return false;
+            }
+            p += 2;
+            if group < 5 {
+                // Expect ':'
+                if p >= self.input.len() || self.input[p] != b':' {
+                    return false;
+                }
+                p += 1;
+            }
+        }
+        // After the MAC, should not be followed by an ident-part char (to avoid matching inside a longer token)
+        p < self.input.len() && !is_ident_part(self.input[p])
     }
 
-    fn read_mac_or_ip(&mut self) -> Result<(), LexerError> {
-        // This shouldn't be called with our current logic
-        // MAC addresses start with hex digits, not ':'
-        // Keep this as a fallback
-        self.read_identifier()
+    fn looks_like_ipv6_from_start(&self) -> bool {
+        // Check if current position starts an IPv6 address containing ':'
+        // Heuristic: digits followed by ':' somewhere in the token
+        let mut p = self.pos;
+        // Read initial digits (hex)
+        while p < self.input.len() && self.input[p].is_ascii_hexdigit() {
+            p += 1;
+        }
+        // Must have at least one ':' following the digits to be IPv6-like
+        p < self.input.len() && self.input[p] == b':'
     }
 
     fn read_identifier(&mut self) -> Result<(), LexerError> {

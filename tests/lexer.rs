@@ -83,7 +83,7 @@ mod tests {
                 _ => None,
             })
             .collect();
-        assert_eq!(strs, vec![r#"foo "bar""#, r"C:\foo\bar"]);
+        assert_eq!(strs, vec![r#"foo "bar""#, r"C:\\foo\\bar"]);
     }
 
     #[test]

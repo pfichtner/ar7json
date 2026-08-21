@@ -101,7 +101,30 @@ impl<'a> Parser<'a> {
 
         if self.check(&TokenKind::LBrace) {
             self.advance(); // consume {
-            let value = self.parse_block_entries(None)?;
+            let first_value = self.parse_block_entries(None)?;
+
+            // Check for implicit list of blocks: } { pattern
+            let mut items = vec![first_value];
+            loop {
+                while self.skip_whitespace() {}
+                let between_comments = self.collect_comments();
+                trailing_trivia.extend(between_comments);
+                while self.skip_whitespace() {}
+                if self.check(&TokenKind::LBrace) {
+                    self.advance(); // consume {
+                    let item = self.parse_block_entries(None)?;
+                    items.push(item);
+                } else {
+                    break;
+                }
+            }
+
+            let value = if items.len() == 1 {
+                items.into_iter().next().unwrap()
+            } else {
+                Value::List(ListValue { items })
+            };
+
             while self.skip_whitespace() {}
             trailing_trivia.extend(self.collect_comments());
             Ok(Some(Entry {
@@ -318,7 +341,30 @@ impl<'a> Parser<'a> {
 
             if self.check(&TokenKind::LBrace) {
                 self.advance(); // consume {
-                let value = self.parse_block_entries(Some(d))?;
+                let first_value = self.parse_block_entries(Some(d))?;
+
+                // Check for implicit list of blocks: } { pattern
+                let mut items = vec![first_value];
+                loop {
+                    while self.skip_whitespace() {}
+                    let between_comments = self.collect_comments();
+                    trailing_trivia.extend(between_comments);
+                    while self.skip_whitespace() {}
+                    if self.check(&TokenKind::LBrace) {
+                        self.advance(); // consume {
+                        let item = self.parse_block_entries(Some(d))?;
+                        items.push(item);
+                    } else {
+                        break;
+                    }
+                }
+
+                let value = if items.len() == 1 {
+                    items.into_iter().next().unwrap()
+                } else {
+                    Value::List(ListValue { items })
+                };
+
                 while self.skip_whitespace() {}
                 trailing_trivia.extend(self.collect_comments());
                 entries.push(Entry {
@@ -445,25 +491,66 @@ fn is_mac_address(s: &str) -> bool {
 }
 
 pub fn parse(input: &str) -> Result<Document, Ar7Error> {
-    let input = strip_avm_export_header(input);
+    let stripped = strip_avm_export_markers(input);
 
-    let mut lexer = Lexer::new(input);
+    let mut lexer = Lexer::new(&stripped);
     let tokens = lexer.tokenize().map_err(|e| Ar7Error::General {
         message: e.to_string(),
     })?;
 
-    let mut parser = Parser::new(input, tokens);
+    let mut parser = Parser::new(&stripped, tokens);
     parser.parse_document()
 }
 
-fn strip_avm_export_header(input: &str) -> &str {
-    if !input.starts_with("****") {
-        return input;
-    }
-    if let Some(start) = input.find("/*") {
-        if let Some(end) = input[start..].find("*/") {
-            return input[start + end + 2..].trim_start();
+fn strip_avm_export_markers(input: &str) -> String {
+    // Strip AVM export markers and their associated non-AR7 content.
+    // Format: **** FRITZ!Box... <metadata> **** CFGFILE:name /* */ <AR7> // EOF **** END OF FILE ****
+    //   then: **** B64FILE:name <base64> **** END OF FILE ****
+    // Strategy: when we see a **** line, skip it and its associated junk, keep AR7 content.
+    let bytes = input.as_bytes();
+    let len = bytes.len();
+    let mut out = String::with_capacity(len);
+    let mut i: usize = 0;
+
+    while i < len {
+        if i + 4 <= len && &bytes[i..i + 4] == b"****" {
+            // Read the **** marker line to determine type
+            let marker_start = i;
+            while i < len && bytes[i] != b'\n' { i += 1; }
+            if i < len { i += 1; }
+            let marker_len = i - marker_start;
+            let marker_line = &input[marker_start..marker_start + marker_len].trim_end();
+
+            if marker_line.starts_with("**** CFGFILE:") {
+                // CFGFILE: skip the /* ... */ comment that follows, then keep AR7 content
+                loop {
+                    // Skip whitespace between comment blocks
+                    while i < len && (bytes[i] == b' ' || bytes[i] == b'\t' || bytes[i] == b'\n' || bytes[i] == b'\r') {
+                        i += 1;
+                    }
+                    if i + 1 < len && bytes[i] == b'/' && bytes[i + 1] == b'*' {
+                        let mut j = i + 2;
+                        while j + 1 < len {
+                            if bytes[j] == b'*' && bytes[j + 1] == b'/' { j += 2; break; }
+                            j += 1;
+                        }
+                        i = j;
+                    } else {
+                        break;
+                    }
+                }
+                // Now i points at the AR7 content — fall through to output it
+            } else {
+                // Non-CFGFILE marker (header, END OF FILE, B64FILE): skip until next **** or end
+                while i < len {
+                    if i + 4 <= len && &bytes[i..i + 4] == b"****" { break; }
+                    i += 1;
+                }
+            }
+        } else {
+            out.push(bytes[i] as char);
+            i += 1;
         }
     }
-    input
+    out
 }
