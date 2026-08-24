@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "Standalone AR7 ↔ JSON converter for AVM FRITZ!Box ar7.cfg configuration files"
-repository = "https://github.com/ar7json/ar7json"
+repository = "https://github.com/pfichtner/ar7json"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
