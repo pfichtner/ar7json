@@ -3,7 +3,11 @@ use std::io::{self, Read, Write};
 use std::path::PathBuf;
 use std::process;
 
-use clap::{Parser, Subcommand};
+use clap::CommandFactory;
+use clap::Parser;
+use clap::Subcommand;
+use clap_complete::generate;
+use clap_complete::Shell;
 
 #[derive(Parser)]
 #[command(
@@ -54,6 +58,22 @@ enum Commands {
         output: Option<PathBuf>,
     },
 
+    /// Generate shell completion scripts
+    Completions {
+        /// Shell to generate completions for
+        shell: Shell,
+        /// Output file (writes to stdout if omitted)
+        #[arg(short, long)]
+        output: Option<PathBuf>,
+    },
+
+    /// Generate man page
+    Man {
+        /// Output file (writes to stdout if omitted)
+        #[arg(short, long)]
+        output: Option<PathBuf>,
+    },
+
     /// Show version information
     Version,
 }
@@ -93,6 +113,8 @@ fn main() {
         Commands::ToAr7 { input, output } => cmd_to_ar7(&input, &output),
         Commands::Check { input } => cmd_check(&input),
         Commands::Format { input, output } => cmd_format(&input, &output),
+        Commands::Completions { shell, output } => cmd_completions(shell, &output),
+        Commands::Man { output } => cmd_man(&output),
         Commands::Version => {
             println!("ar7json {}", env!("CARGO_PKG_VERSION"));
             Ok(())
@@ -163,5 +185,23 @@ fn cmd_format(
     let formatted = ar7json::serialize(&doc)?;
 
     write_output(output, &formatted)?;
+    Ok(())
+}
+
+fn cmd_completions(
+    shell: Shell,
+    output: &Option<PathBuf>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Cli::command();
+    let mut buf = Vec::new();
+    generate(shell, &mut cmd, "ar7json", &mut buf);
+    write_output(output, &String::from_utf8(buf)?)?;
+    Ok(())
+}
+
+fn cmd_man(output: &Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
+    let mut buf = Vec::new();
+    clap_mangen::Man::new(Cli::command()).render(&mut buf)?;
+    write_output(output, &String::from_utf8(buf)?)?;
     Ok(())
 }

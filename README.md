@@ -88,6 +88,23 @@ ar7json format config.ar7
 ar7json format config.ar7 -o formatted.ar7
 ```
 
+### Generate shell completions
+
+```bash
+ar7json completions bash > ~/.local/share/bash-completion/completions/ar7json
+ar7json completions zsh > "${fpath[1]}/_ar7json"
+ar7json completions fish > ~/.config/fish/completions/ar7json.fish
+```
+
+Supported shells: `bash`, `zsh`, `fish`, `powershell`, `elvish`. Use `-o` to write to a file.
+
+### Generate man page
+
+```bash
+ar7json man > ~/.local/share/man/man1/ar7json.1
+ar7json man -o ar7json.1
+```
+
 ### Pipe support (stdin/stdout)
 
 ```bash
@@ -198,7 +215,9 @@ acceptable; syntactic/semantic differences other than lost trivia are not.
 
 The CLI has byte-exact golden tests powered by [trycmd](https://docs.rs/trycmd) in
 `tests/cmd/*.trycmd` and `tests/cmd/*.toml`. They pin the exact stdout/stderr of
-`to-json`, `format`, `to-json --simple`, `check`, and stdin piping for every fixture.
+`to-json`, `format`, `to-json --simple`, `check`, stdin piping, `completions`, and
+`man` for every fixture. The `completions`/`man` commands are additionally covered by
+structural integration tests in `tests/generate.rs`.
 
 ```bash
 cargo test --test cli                          # run golden tests

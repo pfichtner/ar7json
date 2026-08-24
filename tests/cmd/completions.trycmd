@@ -1,0 +1,915 @@
+# Shell completion script generation.
+
+```console
+$ ar7json completions bash
+_ar7json() {
+    local i cur prev opts cmd
+    COMPREPLY=()
+    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+        cur="$2"
+    else
+        cur="${COMP_WORDS[COMP_CWORD]}"
+    fi
+    prev="$3"
+    cmd=""
+    opts=""
+
+    for i in "${COMP_WORDS[@]:0:COMP_CWORD}"
+    do
+        case "${cmd},${i}" in
+            ",$1")
+                cmd="ar7json"
+                ;;
+            ar7json,check)
+                cmd="ar7json__subcmd__check"
+                ;;
+            ar7json,completions)
+                cmd="ar7json__subcmd__completions"
+                ;;
+            ar7json,format)
+                cmd="ar7json__subcmd__format"
+                ;;
+            ar7json,help)
+                cmd="ar7json__subcmd__help"
+                ;;
+            ar7json,man)
+                cmd="ar7json__subcmd__man"
+                ;;
+            ar7json,to-ar7)
+                cmd="ar7json__subcmd__to__subcmd__ar7"
+                ;;
+            ar7json,to-json)
+                cmd="ar7json__subcmd__to__subcmd__json"
+                ;;
+            ar7json,version)
+                cmd="ar7json__subcmd__version"
+                ;;
+            ar7json__subcmd__help,check)
+                cmd="ar7json__subcmd__help__subcmd__check"
+                ;;
+            ar7json__subcmd__help,completions)
+                cmd="ar7json__subcmd__help__subcmd__completions"
+                ;;
+            ar7json__subcmd__help,format)
+                cmd="ar7json__subcmd__help__subcmd__format"
+                ;;
+            ar7json__subcmd__help,help)
+                cmd="ar7json__subcmd__help__subcmd__help"
+                ;;
+            ar7json__subcmd__help,man)
+                cmd="ar7json__subcmd__help__subcmd__man"
+                ;;
+            ar7json__subcmd__help,to-ar7)
+                cmd="ar7json__subcmd__help__subcmd__to__subcmd__ar7"
+                ;;
+            ar7json__subcmd__help,to-json)
+                cmd="ar7json__subcmd__help__subcmd__to__subcmd__json"
+                ;;
+            ar7json__subcmd__help,version)
+                cmd="ar7json__subcmd__help__subcmd__version"
+                ;;
+            *)
+                ;;
+        esac
+    done
+
+    case "${cmd}" in
+        ar7json)
+            opts="-h -V --help --version to-json to-ar7 check format completions man version help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__check)
+            opts="-h --help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__completions)
+            opts="-o -h --output --help bash elvish fish powershell zsh"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                --output)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -o)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__format)
+            opts="-o -h --output --help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                --output)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -o)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__help)
+            opts="to-json to-ar7 check format completions man version help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__help__subcmd__check)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__help__subcmd__completions)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__help__subcmd__format)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__help__subcmd__help)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__help__subcmd__man)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__help__subcmd__to__subcmd__ar7)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__help__subcmd__to__subcmd__json)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__help__subcmd__version)
+            opts=""
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__man)
+            opts="-o -h --output --help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                --output)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -o)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__to__subcmd__ar7)
+            opts="-o -h --output --help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                --output)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -o)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__to__subcmd__json)
+            opts="-o -h --output --simple --help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                --output)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -o)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        ar7json__subcmd__version)
+            opts="-h --help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+    esac
+}
+
+if [[ "${BASH_VERSINFO[0]}" -eq 4 && "${BASH_VERSINFO[1]}" -ge 4 || "${BASH_VERSINFO[0]}" -gt 4 ]]; then
+    complete -F _ar7json -o nosort -o bashdefault -o default ar7json
+else
+    complete -F _ar7json -o bashdefault -o default ar7json
+fi
+
+```
+
+```console
+$ ar7json completions zsh
+#compdef ar7json
+
+autoload -U is-at-least
+
+_ar7json() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" : /
+'-h[Print help]' /
+'--help[Print help]' /
+'-V[Print version]' /
+'--version[Print version]' /
+":: :_ar7json_commands" /
+"*::: :->ar7json" /
+&& ret=0
+    case $state in
+    (ar7json)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:ar7json-command-$line[1]:"
+        case $line[1] in
+            (to-json)
+_arguments "${_arguments_options[@]}" : /
+'-o+[Output file (writes to stdout if omitted)]:OUTPUT:_files' /
+'--output=[Output file (writes to stdout if omitted)]:OUTPUT:_files' /
+'--simple[Use simplified JSON representation (lossy, read-only)]' /
+'-h[Print help]' /
+'--help[Print help]' /
+'::input -- Input file (reads stdin if omitted):_files' /
+&& ret=0
+;;
+(to-ar7)
+_arguments "${_arguments_options[@]}" : /
+'-o+[Output file (writes to stdout if omitted)]:OUTPUT:_files' /
+'--output=[Output file (writes to stdout if omitted)]:OUTPUT:_files' /
+'-h[Print help]' /
+'--help[Print help]' /
+'::input -- Input JSON file (reads stdin if omitted):_files' /
+&& ret=0
+;;
+(check)
+_arguments "${_arguments_options[@]}" : /
+'-h[Print help]' /
+'--help[Print help]' /
+'::input -- Input file (reads stdin if omitted):_files' /
+&& ret=0
+;;
+(format)
+_arguments "${_arguments_options[@]}" : /
+'-o+[Output file (writes to stdout if omitted)]:OUTPUT:_files' /
+'--output=[Output file (writes to stdout if omitted)]:OUTPUT:_files' /
+'-h[Print help]' /
+'--help[Print help]' /
+'::input -- Input file (reads stdin if omitted):_files' /
+&& ret=0
+;;
+(completions)
+_arguments "${_arguments_options[@]}" : /
+'-o+[Output file (writes to stdout if omitted)]:OUTPUT:_files' /
+'--output=[Output file (writes to stdout if omitted)]:OUTPUT:_files' /
+'-h[Print help]' /
+'--help[Print help]' /
+':shell -- Shell to generate completions for:(bash elvish fish powershell zsh)' /
+&& ret=0
+;;
+(man)
+_arguments "${_arguments_options[@]}" : /
+'-o+[Output file (writes to stdout if omitted)]:OUTPUT:_files' /
+'--output=[Output file (writes to stdout if omitted)]:OUTPUT:_files' /
+'-h[Print help]' /
+'--help[Print help]' /
+&& ret=0
+;;
+(version)
+_arguments "${_arguments_options[@]}" : /
+'-h[Print help]' /
+'--help[Print help]' /
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : /
+":: :_ar7json__subcmd__help_commands" /
+"*::: :->help" /
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:ar7json-help-command-$line[1]:"
+        case $line[1] in
+            (to-json)
+_arguments "${_arguments_options[@]}" : /
+&& ret=0
+;;
+(to-ar7)
+_arguments "${_arguments_options[@]}" : /
+&& ret=0
+;;
+(check)
+_arguments "${_arguments_options[@]}" : /
+&& ret=0
+;;
+(format)
+_arguments "${_arguments_options[@]}" : /
+&& ret=0
+;;
+(completions)
+_arguments "${_arguments_options[@]}" : /
+&& ret=0
+;;
+(man)
+_arguments "${_arguments_options[@]}" : /
+&& ret=0
+;;
+(version)
+_arguments "${_arguments_options[@]}" : /
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : /
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+}
+
+(( $+functions[_ar7json_commands] )) ||
+_ar7json_commands() {
+    local commands; commands=(
+'to-json:Convert AR7 configuration to JSON' /
+'to-ar7:Convert JSON back to AR7 configuration' /
+'check:Check AR7 configuration for syntax errors' /
+'format:Format AR7 configuration with canonical formatting' /
+'completions:Generate shell completion scripts' /
+'man:Generate man page' /
+'version:Show version information' /
+'help:Print this message or the help of the given subcommand(s)' /
+    )
+    _describe -t commands 'ar7json commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__check_commands] )) ||
+_ar7json__subcmd__check_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json check commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__completions_commands] )) ||
+_ar7json__subcmd__completions_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json completions commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__format_commands] )) ||
+_ar7json__subcmd__format_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json format commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__help_commands] )) ||
+_ar7json__subcmd__help_commands() {
+    local commands; commands=(
+'to-json:Convert AR7 configuration to JSON' /
+'to-ar7:Convert JSON back to AR7 configuration' /
+'check:Check AR7 configuration for syntax errors' /
+'format:Format AR7 configuration with canonical formatting' /
+'completions:Generate shell completion scripts' /
+'man:Generate man page' /
+'version:Show version information' /
+'help:Print this message or the help of the given subcommand(s)' /
+    )
+    _describe -t commands 'ar7json help commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__help__subcmd__check_commands] )) ||
+_ar7json__subcmd__help__subcmd__check_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json help check commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__help__subcmd__completions_commands] )) ||
+_ar7json__subcmd__help__subcmd__completions_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json help completions commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__help__subcmd__format_commands] )) ||
+_ar7json__subcmd__help__subcmd__format_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json help format commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__help__subcmd__help_commands] )) ||
+_ar7json__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json help help commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__help__subcmd__man_commands] )) ||
+_ar7json__subcmd__help__subcmd__man_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json help man commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__help__subcmd__to-ar7_commands] )) ||
+_ar7json__subcmd__help__subcmd__to-ar7_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json help to-ar7 commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__help__subcmd__to-json_commands] )) ||
+_ar7json__subcmd__help__subcmd__to-json_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json help to-json commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__help__subcmd__version_commands] )) ||
+_ar7json__subcmd__help__subcmd__version_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json help version commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__man_commands] )) ||
+_ar7json__subcmd__man_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json man commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__to-ar7_commands] )) ||
+_ar7json__subcmd__to-ar7_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json to-ar7 commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__to-json_commands] )) ||
+_ar7json__subcmd__to-json_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json to-json commands' commands "$@"
+}
+(( $+functions[_ar7json__subcmd__version_commands] )) ||
+_ar7json__subcmd__version_commands() {
+    local commands; commands=()
+    _describe -t commands 'ar7json version commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_ar7json" ]; then
+    _ar7json "$@"
+else
+    compdef _ar7json ar7json
+fi
+
+```
+
+```console
+$ ar7json completions fish
+# Print an optspec for argparse to handle cmd's options that are independent of any subcommand.
+function __fish_ar7json_global_optspecs
+    string join /n h/help V/version
+end
+
+function __fish_ar7json_needs_command
+    # Figure out if the current invocation already has a command.
+    set -l cmd (commandline -opc)
+    set -e cmd[1]
+    argparse -s (__fish_ar7json_global_optspecs) -- $cmd 2>/dev/null
+    or return
+    if set -q argv[1]
+        # Also print the command, so this can be used to figure out what it is.
+        echo $argv[1]
+        return 1
+    end
+    return 0
+end
+
+function __fish_ar7json_using_subcommand
+    set -l cmd (__fish_ar7json_needs_command)
+    test -z "$cmd"
+    and return 1
+    contains -- $cmd[1] $argv
+end
+
+complete -c ar7json -n "__fish_ar7json_needs_command" -s h -l help -d 'Print help'
+complete -c ar7json -n "__fish_ar7json_needs_command" -s V -l version -d 'Print version'
+complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "to-json" -d 'Convert AR7 configuration to JSON'
+complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "to-ar7" -d 'Convert JSON back to AR7 configuration'
+complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "check" -d 'Check AR7 configuration for syntax errors'
+complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "format" -d 'Format AR7 configuration with canonical formatting'
+complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "completions" -d 'Generate shell completion scripts'
+complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "man" -d 'Generate man page'
+complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "version" -d 'Show version information'
+complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
+complete -c ar7json -n "__fish_ar7json_using_subcommand to-json" -s o -l output -d 'Output file (writes to stdout if omitted)' -r -F
+complete -c ar7json -n "__fish_ar7json_using_subcommand to-json" -l simple -d 'Use simplified JSON representation (lossy, read-only)'
+complete -c ar7json -n "__fish_ar7json_using_subcommand to-json" -s h -l help -d 'Print help'
+complete -c ar7json -n "__fish_ar7json_using_subcommand to-ar7" -s o -l output -d 'Output file (writes to stdout if omitted)' -r -F
+complete -c ar7json -n "__fish_ar7json_using_subcommand to-ar7" -s h -l help -d 'Print help'
+complete -c ar7json -n "__fish_ar7json_using_subcommand check" -s h -l help -d 'Print help'
+complete -c ar7json -n "__fish_ar7json_using_subcommand format" -s o -l output -d 'Output file (writes to stdout if omitted)' -r -F
+complete -c ar7json -n "__fish_ar7json_using_subcommand format" -s h -l help -d 'Print help'
+complete -c ar7json -n "__fish_ar7json_using_subcommand completions" -s o -l output -d 'Output file (writes to stdout if omitted)' -r -F
+complete -c ar7json -n "__fish_ar7json_using_subcommand completions" -s h -l help -d 'Print help'
+complete -c ar7json -n "__fish_ar7json_using_subcommand man" -s o -l output -d 'Output file (writes to stdout if omitted)' -r -F
+complete -c ar7json -n "__fish_ar7json_using_subcommand man" -s h -l help -d 'Print help'
+complete -c ar7json -n "__fish_ar7json_using_subcommand version" -s h -l help -d 'Print help'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "to-json" -d 'Convert AR7 configuration to JSON'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "to-ar7" -d 'Convert JSON back to AR7 configuration'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "check" -d 'Check AR7 configuration for syntax errors'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "format" -d 'Format AR7 configuration with canonical formatting'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "completions" -d 'Generate shell completion scripts'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "man" -d 'Generate man page'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "version" -d 'Show version information'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
+
+```
+
+```console
+$ ar7json completions powershell
+
+using namespace System.Management.Automation
+using namespace System.Management.Automation.Language
+
+Register-ArgumentCompleter -Native -CommandName 'ar7json' -ScriptBlock {
+    param($wordToComplete, $commandAst, $cursorPosition)
+
+    $commandElements = $commandAst.CommandElements
+    $command = @(
+        'ar7json'
+        for ($i = 1; $i -lt $commandElements.Count; $i++) {
+            $element = $commandElements[$i]
+            if ($element -isnot [StringConstantExpressionAst] -or
+                $element.StringConstantType -ne [StringConstantType]::BareWord -or
+                $element.Value.StartsWith('-') -or
+                $element.Value -eq $wordToComplete) {
+                break
+        }
+        $element.Value
+    }) -join ';'
+
+    $completions = @(switch ($command) {
+        'ar7json' {
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-V', '-V ', [CompletionResultType]::ParameterName, 'Print version')
+            [CompletionResult]::new('--version', '--version', [CompletionResultType]::ParameterName, 'Print version')
+            [CompletionResult]::new('to-json', 'to-json', [CompletionResultType]::ParameterValue, 'Convert AR7 configuration to JSON')
+            [CompletionResult]::new('to-ar7', 'to-ar7', [CompletionResultType]::ParameterValue, 'Convert JSON back to AR7 configuration')
+            [CompletionResult]::new('check', 'check', [CompletionResultType]::ParameterValue, 'Check AR7 configuration for syntax errors')
+            [CompletionResult]::new('format', 'format', [CompletionResultType]::ParameterValue, 'Format AR7 configuration with canonical formatting')
+            [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate shell completion scripts')
+            [CompletionResult]::new('man', 'man', [CompletionResultType]::ParameterValue, 'Generate man page')
+            [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Show version information')
+            [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Print this message or the help of the given subcommand(s)')
+            break
+        }
+        'ar7json;to-json' {
+            [CompletionResult]::new('-o', '-o', [CompletionResultType]::ParameterName, 'Output file (writes to stdout if omitted)')
+            [CompletionResult]::new('--output', '--output', [CompletionResultType]::ParameterName, 'Output file (writes to stdout if omitted)')
+            [CompletionResult]::new('--simple', '--simple', [CompletionResultType]::ParameterName, 'Use simplified JSON representation (lossy, read-only)')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'ar7json;to-ar7' {
+            [CompletionResult]::new('-o', '-o', [CompletionResultType]::ParameterName, 'Output file (writes to stdout if omitted)')
+            [CompletionResult]::new('--output', '--output', [CompletionResultType]::ParameterName, 'Output file (writes to stdout if omitted)')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'ar7json;check' {
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'ar7json;format' {
+            [CompletionResult]::new('-o', '-o', [CompletionResultType]::ParameterName, 'Output file (writes to stdout if omitted)')
+            [CompletionResult]::new('--output', '--output', [CompletionResultType]::ParameterName, 'Output file (writes to stdout if omitted)')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'ar7json;completions' {
+            [CompletionResult]::new('-o', '-o', [CompletionResultType]::ParameterName, 'Output file (writes to stdout if omitted)')
+            [CompletionResult]::new('--output', '--output', [CompletionResultType]::ParameterName, 'Output file (writes to stdout if omitted)')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'ar7json;man' {
+            [CompletionResult]::new('-o', '-o', [CompletionResultType]::ParameterName, 'Output file (writes to stdout if omitted)')
+            [CompletionResult]::new('--output', '--output', [CompletionResultType]::ParameterName, 'Output file (writes to stdout if omitted)')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'ar7json;version' {
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
+        'ar7json;help' {
+            [CompletionResult]::new('to-json', 'to-json', [CompletionResultType]::ParameterValue, 'Convert AR7 configuration to JSON')
+            [CompletionResult]::new('to-ar7', 'to-ar7', [CompletionResultType]::ParameterValue, 'Convert JSON back to AR7 configuration')
+            [CompletionResult]::new('check', 'check', [CompletionResultType]::ParameterValue, 'Check AR7 configuration for syntax errors')
+            [CompletionResult]::new('format', 'format', [CompletionResultType]::ParameterValue, 'Format AR7 configuration with canonical formatting')
+            [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate shell completion scripts')
+            [CompletionResult]::new('man', 'man', [CompletionResultType]::ParameterValue, 'Generate man page')
+            [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Show version information')
+            [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Print this message or the help of the given subcommand(s)')
+            break
+        }
+        'ar7json;help;to-json' {
+            break
+        }
+        'ar7json;help;to-ar7' {
+            break
+        }
+        'ar7json;help;check' {
+            break
+        }
+        'ar7json;help;format' {
+            break
+        }
+        'ar7json;help;completions' {
+            break
+        }
+        'ar7json;help;man' {
+            break
+        }
+        'ar7json;help;version' {
+            break
+        }
+        'ar7json;help;help' {
+            break
+        }
+    })
+
+    $completions.Where{ $_.CompletionText -like "$wordToComplete*" } |
+        Sort-Object -Property ListItemText
+}
+
+```
+
+```console
+$ ar7json completions elvish
+
+use builtin;
+use str;
+
+set edit:completion:arg-completer[ar7json] = {|@words|
+    fn spaces {|n|
+        builtin:repeat $n ' ' | str:join ''
+    }
+    fn cand {|text desc|
+        edit:complex-candidate $text &display=$text' '(spaces (- 14 (wcswidth $text)))$desc
+    }
+    var command = 'ar7json'
+    for word $words[1..-1] {
+        if (str:has-prefix $word '-') {
+            break
+        }
+        set command = $command';'$word
+    }
+    var completions = [
+        &'ar7json'= {
+            cand -h 'Print help'
+            cand --help 'Print help'
+            cand -V 'Print version'
+            cand --version 'Print version'
+            cand to-json 'Convert AR7 configuration to JSON'
+            cand to-ar7 'Convert JSON back to AR7 configuration'
+            cand check 'Check AR7 configuration for syntax errors'
+            cand format 'Format AR7 configuration with canonical formatting'
+            cand completions 'Generate shell completion scripts'
+            cand man 'Generate man page'
+            cand version 'Show version information'
+            cand help 'Print this message or the help of the given subcommand(s)'
+        }
+        &'ar7json;to-json'= {
+            cand -o 'Output file (writes to stdout if omitted)'
+            cand --output 'Output file (writes to stdout if omitted)'
+            cand --simple 'Use simplified JSON representation (lossy, read-only)'
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'ar7json;to-ar7'= {
+            cand -o 'Output file (writes to stdout if omitted)'
+            cand --output 'Output file (writes to stdout if omitted)'
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'ar7json;check'= {
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'ar7json;format'= {
+            cand -o 'Output file (writes to stdout if omitted)'
+            cand --output 'Output file (writes to stdout if omitted)'
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'ar7json;completions'= {
+            cand -o 'Output file (writes to stdout if omitted)'
+            cand --output 'Output file (writes to stdout if omitted)'
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'ar7json;man'= {
+            cand -o 'Output file (writes to stdout if omitted)'
+            cand --output 'Output file (writes to stdout if omitted)'
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'ar7json;version'= {
+            cand -h 'Print help'
+            cand --help 'Print help'
+        }
+        &'ar7json;help'= {
+            cand to-json 'Convert AR7 configuration to JSON'
+            cand to-ar7 'Convert JSON back to AR7 configuration'
+            cand check 'Check AR7 configuration for syntax errors'
+            cand format 'Format AR7 configuration with canonical formatting'
+            cand completions 'Generate shell completion scripts'
+            cand man 'Generate man page'
+            cand version 'Show version information'
+            cand help 'Print this message or the help of the given subcommand(s)'
+        }
+        &'ar7json;help;to-json'= {
+        }
+        &'ar7json;help;to-ar7'= {
+        }
+        &'ar7json;help;check'= {
+        }
+        &'ar7json;help;format'= {
+        }
+        &'ar7json;help;completions'= {
+        }
+        &'ar7json;help;man'= {
+        }
+        &'ar7json;help;version'= {
+        }
+        &'ar7json;help;help'= {
+        }
+    ]
+    $completions[$command]
+}
+
+```
