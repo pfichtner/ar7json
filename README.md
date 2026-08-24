@@ -37,7 +37,7 @@ dedicated tool for every common operation.
 
 **This project does not claim to be an official AVM implementation or specification of
 the AR7 configuration language.** It is a reconstructed parser based on analysis of
-real-world configuration files. AR7 is a proprietary format owned by AVM GmbH.
+real-world configuration files. AR7 is a proprietary format owned by FRITZ! GmbH (formerly AVM GmbH).
 
 ## Installation
 
