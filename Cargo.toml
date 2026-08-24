@@ -19,6 +19,22 @@ predicates = "3"
 tempfile = "3"
 trycmd = "1"
 
+[package.metadata.deb]
+maintainer = "Peter Fichtner <1958485+pfichtner@users.noreply.github.com>"
+copyright = "2026, Peter Fichtner"
+extended-description = """\
+Standalone converter between AVM FRITZ!Box ar7.cfg (AR7) format and JSON. \
+Parses AVM export files including the header and produces round-trip-safe \
+output in both directions."""
+depends = "$auto"
+section = "utils"
+priority = "optional"
+license-file = ["LICENSE", "4"]
+assets = [["target/release/ar7json", "usr/bin/", "755"]]
+
+[package.metadata.generate-rpm]
+assets = [{ source = "target/release/ar7json", dest = "/usr/bin/ar7json", mode = "755" }]
+
 [profile.release]
 opt-level = 3
 lto = "thin"
