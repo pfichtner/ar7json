@@ -90,11 +90,21 @@ jobs:
           path: target/${{ matrix.target }}/release/ar7json${{ endsWith(matrix.artifact, '.exe') && '.exe' || '' }}
           retention-days: 14
 
+      - name: Create symlinks
+        if: startsWith(github.ref, 'refs/tags/') && runner.os != 'Windows'
+        run: |
+          cd target/${{ matrix.target }}/release
+          ln -s ar7json ar7-to-json
+          ln -s ar7json json-to-ar7
+          ln -s ar7json ar7-check
+          ln -s ar7json ar7-fmt
+
       - name: Create archive (unix)
         if: startsWith(github.ref, 'refs/tags/') && runner.os != 'Windows'
         run: |
           cd target/${{ matrix.target }}/release
-          tar czf ../../../ar7json-${{ github.ref_name }}-${{ matrix.target }}.tar.gz ar7json
+          tar czf ../../../ar7json-${{ github.ref_name }}-${{ matrix.target }}.tar.gz \
+            ar7json ar7-to-json json-to-ar7 ar7-check ar7-fmt
 
       - name: Create archive (windows)
         if: startsWith(github.ref, 'refs/tags/') && runner.os == 'Windows'
@@ -103,29 +113,80 @@ jobs:
           cd target/${{ matrix.target }}/release
           Compress-Archive -Path ar7json.exe -DestinationPath ../../../ar7json-${{ github.ref_name }}-${{ matrix.target }}.zip
 
-      - name: Install cargo-deb
-        if: startsWith(github.ref, 'refs/tags/') && matrix.make-deb
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-deb
-
       - name: Build Debian package
         if: startsWith(github.ref, 'refs/tags/') && matrix.make-deb
         run: |
-          cargo deb --no-build --target ${{ matrix.target }} \
-            --output ar7json-${{ github.ref_name }}-${{ matrix.target }}.deb
+          VERSION="${github.ref_name#v}"
+          case "${{ matrix.target }}" in
+            x86_64-unknown-linux-gnu)     ARCH=amd64 ;;
+            aarch64-unknown-linux-gnu)    ARCH=arm64 ;;
+            armv7-unknown-linux-gnueabihf) ARCH=armhf ;;
+          esac
+          PKG_DIR="ar7json_${VERSION}_${ARCH}"
+          mkdir -p "$PKG_DIR/DEBIAN" "$PKG_DIR/usr/bin"
+          cp "target/${{ matrix.target }}/release/ar7json" "$PKG_DIR/usr/bin/"
+          cd "$PKG_DIR/usr/bin"
+          ln -s ar7json ar7-to-json
+          ln -s ar7json json-to-ar7
+          ln -s ar7json ar7-check
+          ln -s ar7json ar7-fmt
+          cd ../../..
+          cat > "$PKG_DIR/DEBIAN/control" <<EOF
+          Package: ar7json
+          Version: $VERSION
+          Architecture: $ARCH
+          Depends: ${misc:Depends}
+          Maintainer: Peter Fichtner <1958485+pfichtner@users.noreply.github.com>
+          Description: Standalone AR7 to JSON converter for AVM FRITZ!Box ar7.cfg configuration files
+           Standalone converter between AVM FRITZ!Box ar7.cfg (AR7) format and JSON.
+           Parses AVM export files including the header and produces round-trip-safe
+           output in both directions.
+          Section: utils
+          Priority: optional
+          EOF
+          dpkg-deb --build "$PKG_DIR" "ar7json-${{ github.ref_name }}-${{ matrix.target }}.deb"
 
-      - name: Install cargo-generate-rpm
+      - name: Install rpm-build
         if: startsWith(github.ref, 'refs/tags/') && matrix.make-rpm
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-generate-rpm
+        run: sudo apt-get update && sudo apt-get install -y rpm
 
       - name: Build RPM package
         if: startsWith(github.ref, 'refs/tags/') && matrix.make-rpm
         run: |
-          cargo generate-rpm --target ${{ matrix.target }} \
-            --output ar7json-${{ github.ref_name }}-${{ matrix.target }}.rpm
+          VERSION="${github.ref_name#v}"
+          case "${{ matrix.target }}" in
+            x86_64-unknown-linux-gnu)  RPM_ARCH=x86_64 ;;
+            aarch64-unknown-linux-gnu) RPM_ARCH=aarch64 ;;
+          esac
+          RPM_DIR=$(mktemp -d)
+          mkdir -p "$RPM_DIR"/{BUILD,RPMS(noarch),SOURCES,SPECS,SRPMS}
+          cp "target/${{ matrix.target }}/release/ar7json" "$RPM_DIR/SOURCES/"
+          cat > "$RPM_DIR/SPECS/ar7json.spec" <<EOF
+          Name:           ar7json
+          Version:        $VERSION
+          Release:        1
+          Summary:        Standalone AR7 to JSON converter for AVM FRITZ!Box ar7.cfg configuration files
+          License:        MIT
+          URL:            https://github.com/pfichtner/ar7json
+          %description
+          Standalone converter between AVM FRITZ!Box ar7.cfg (AR7) format and JSON.
+          %install
+          mkdir -p %{buildroot}/usr/bin
+          cp %{_sourcedir}/ar7json %{buildroot}/usr/bin/ar7json
+          cd %{buildroot}/usr/bin
+          ln -s ar7json ar7-to-json
+          ln -s ar7json json-to-ar7
+          ln -s ar7json ar7-check
+          ln -s ar7json ar7-fmt
+          %files
+          %attr(755,root,root) /usr/bin/ar7json
+          /usr/bin/ar7-to-json
+          /usr/bin/json-to-ar7
+          /usr/bin/ar7-check
+          /usr/bin/ar7-fmt
+          EOF
+          rpmbuild -bb --define "_topdir $RPM_DIR" --target "$RPM_ARCH" "$RPM_DIR/SPECS/ar7json.spec"
+          cp "$RPM_DIR/RPMS/$RPM_ARCH"/ar7json-*.rpm "ar7json-${{ github.ref_name }}-${{ matrix.target }}.rpm"
 
       - name: Upload archive
         if: startsWith(github.ref, 'refs/tags/')

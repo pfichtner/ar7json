@@ -77,13 +77,6 @@ enum Commands {
 
     /// Show version information
     Version,
-
-    /// Create symlinks for short command names in the binary's directory
-    Setup {
-        /// Directory to create symlinks in (defaults to the binary's directory)
-        #[arg(short, long)]
-        dir: Option<PathBuf>,
-    },
 }
 
 fn read_input(input: &Option<PathBuf>) -> Result<String, Box<dyn std::error::Error>> {
@@ -181,7 +174,6 @@ fn dispatch(cmd: Commands) -> Result<(), Box<dyn std::error::Error>> {
             println!("ar7json {}", env!("CARGO_PKG_VERSION"));
             Ok(())
         }
-        Commands::Setup { dir } => cmd_setup(dir.as_ref()),
     }
 }
 
@@ -261,43 +253,3 @@ fn cmd_man(output: &Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-const SYMLINK_NAMES: &[&str] = &["ar7-to-json", "json-to-ar7", "ar7-check", "ar7-fmt"];
-
-fn cmd_setup(dir: Option<&PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
-    let target_dir = match dir {
-        Some(d) => d.clone(),
-        None => env::current_exe()?
-            .parent()
-            .ok_or("cannot determine binary directory")?
-            .to_path_buf(),
-    };
-
-    let exe = env::current_exe()?;
-    let exe_name = exe
-        .file_name()
-        .ok_or("cannot determine binary name")?
-        .to_os_string();
-
-    fs::create_dir_all(&target_dir)?;
-
-    let mut created = Vec::new();
-
-    for name in SYMLINK_NAMES {
-        let link_path = target_dir.join(name);
-        if link_path.exists() || link_path.symlink_metadata().is_ok() {
-            fs::remove_file(&link_path)?;
-        }
-        #[cfg(unix)]
-        std::os::unix::fs::symlink(&exe_name, &link_path)?;
-        #[cfg(not(unix))]
-        fs::copy(&exe, &link_path)?;
-        created.push(name);
-    }
-
-    eprintln!("Created {} symlinks in {}:", created.len(), target_dir.display());
-    for name in &created {
-        eprintln!("  {} -> {}", name, exe.display());
-    }
-
-    Ok(())
-}

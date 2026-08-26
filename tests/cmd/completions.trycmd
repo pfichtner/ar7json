@@ -35,9 +35,6 @@ _ar7json() {
             ar7json,man)
                 cmd="ar7json__subcmd__man"
                 ;;
-            ar7json,setup)
-                cmd="ar7json__subcmd__setup"
-                ;;
             ar7json,to-ar7)
                 cmd="ar7json__subcmd__to__subcmd__ar7"
                 ;;
@@ -62,9 +59,6 @@ _ar7json() {
             ar7json__subcmd__help,man)
                 cmd="ar7json__subcmd__help__subcmd__man"
                 ;;
-            ar7json__subcmd__help,setup)
-                cmd="ar7json__subcmd__help__subcmd__setup"
-                ;;
             ar7json__subcmd__help,to-ar7)
                 cmd="ar7json__subcmd__help__subcmd__to__subcmd__ar7"
                 ;;
@@ -81,7 +75,7 @@ _ar7json() {
 
     case "${cmd}" in
         ar7json)
-            opts="-h -V --help --version to-json to-ar7 check format completions man version setup help"
+            opts="-h -V --help --version to-json to-ar7 check format completions man version help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -153,7 +147,7 @@ _ar7json() {
             return 0
             ;;
         ar7json__subcmd__help)
-            opts="to-json to-ar7 check format completions man version setup help"
+            opts="to-json to-ar7 check format completions man version help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -236,20 +230,6 @@ _ar7json() {
             COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
             return 0
             ;;
-        ar7json__subcmd__help__subcmd__setup)
-            opts=""
-            if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
-                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
-                return 0
-            fi
-            case "${prev}" in
-                *)
-                    COMPREPLY=()
-                    ;;
-            esac
-            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
-            return 0
-            ;;
         ar7json__subcmd__help__subcmd__to__subcmd__ar7)
             opts=""
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 3 ]] ; then
@@ -304,28 +284,6 @@ _ar7json() {
                     return 0
                     ;;
                 -o)
-                    COMPREPLY=($(compgen -f "${cur}"))
-                    return 0
-                    ;;
-                *)
-                    COMPREPLY=()
-                    ;;
-            esac
-            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
-            return 0
-            ;;
-        ar7json__subcmd__setup)
-            opts="-d -h --dir --help"
-            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
-                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
-                return 0
-            fi
-            case "${prev}" in
-                --dir)
-                    COMPREPLY=($(compgen -f "${cur}"))
-                    return 0
-                    ;;
-                -d)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
@@ -495,14 +453,6 @@ _arguments "${_arguments_options[@]}" : /
 '--help[Print help]' /
 && ret=0
 ;;
-(setup)
-_arguments "${_arguments_options[@]}" : /
-'-d+[Directory to create symlinks in (defaults to the binary'/''s directory)]:DIR:_files' /
-'--dir=[Directory to create symlinks in (defaults to the binary'/''s directory)]:DIR:_files' /
-'-h[Print help]' /
-'--help[Print help]' /
-&& ret=0
-;;
 (help)
 _arguments "${_arguments_options[@]}" : /
 ":: :_ar7json__subcmd__help_commands" /
@@ -543,10 +493,6 @@ _arguments "${_arguments_options[@]}" : /
 _arguments "${_arguments_options[@]}" : /
 && ret=0
 ;;
-(setup)
-_arguments "${_arguments_options[@]}" : /
-&& ret=0
-;;
 (help)
 _arguments "${_arguments_options[@]}" : /
 && ret=0
@@ -570,7 +516,6 @@ _ar7json_commands() {
 'completions:Generate shell completion scripts' /
 'man:Generate man page' /
 'version:Show version information' /
-'setup:Create symlinks for short command names in the binary'/''s directory' /
 'help:Print this message or the help of the given subcommand(s)' /
     )
     _describe -t commands 'ar7json commands' commands "$@"
@@ -600,7 +545,6 @@ _ar7json__subcmd__help_commands() {
 'completions:Generate shell completion scripts' /
 'man:Generate man page' /
 'version:Show version information' /
-'setup:Create symlinks for short command names in the binary'/''s directory' /
 'help:Print this message or the help of the given subcommand(s)' /
     )
     _describe -t commands 'ar7json help commands' commands "$@"
@@ -630,11 +574,6 @@ _ar7json__subcmd__help__subcmd__man_commands() {
     local commands; commands=()
     _describe -t commands 'ar7json help man commands' commands "$@"
 }
-(( $+functions[_ar7json__subcmd__help__subcmd__setup_commands] )) ||
-_ar7json__subcmd__help__subcmd__setup_commands() {
-    local commands; commands=()
-    _describe -t commands 'ar7json help setup commands' commands "$@"
-}
 (( $+functions[_ar7json__subcmd__help__subcmd__to-ar7_commands] )) ||
 _ar7json__subcmd__help__subcmd__to-ar7_commands() {
     local commands; commands=()
@@ -654,11 +593,6 @@ _ar7json__subcmd__help__subcmd__version_commands() {
 _ar7json__subcmd__man_commands() {
     local commands; commands=()
     _describe -t commands 'ar7json man commands' commands "$@"
-}
-(( $+functions[_ar7json__subcmd__setup_commands] )) ||
-_ar7json__subcmd__setup_commands() {
-    local commands; commands=()
-    _describe -t commands 'ar7json setup commands' commands "$@"
 }
 (( $+functions[_ar7json__subcmd__to-ar7_commands] )) ||
 _ar7json__subcmd__to-ar7_commands() {
@@ -721,7 +655,6 @@ complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "format" -d 'Format 
 complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "completions" -d 'Generate shell completion scripts'
 complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "man" -d 'Generate man page'
 complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "version" -d 'Show version information'
-complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "setup" -d 'Create symlinks for short command names in the binary/'s directory'
 complete -c ar7json -n "__fish_ar7json_needs_command" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
 complete -c ar7json -n "__fish_ar7json_using_subcommand to-json" -s o -l output -d 'Output file (writes to stdout if omitted)' -r -F
 complete -c ar7json -n "__fish_ar7json_using_subcommand to-json" -l simple -d 'Use simplified JSON representation (lossy, read-only)'
@@ -736,17 +669,14 @@ complete -c ar7json -n "__fish_ar7json_using_subcommand completions" -s h -l hel
 complete -c ar7json -n "__fish_ar7json_using_subcommand man" -s o -l output -d 'Output file (writes to stdout if omitted)' -r -F
 complete -c ar7json -n "__fish_ar7json_using_subcommand man" -s h -l help -d 'Print help'
 complete -c ar7json -n "__fish_ar7json_using_subcommand version" -s h -l help -d 'Print help'
-complete -c ar7json -n "__fish_ar7json_using_subcommand setup" -s d -l dir -d 'Directory to create symlinks in (defaults to the binary/'s directory)' -r -F
-complete -c ar7json -n "__fish_ar7json_using_subcommand setup" -s h -l help -d 'Print help'
-complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version setup help" -f -a "to-json" -d 'Convert AR7 configuration to JSON'
-complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version setup help" -f -a "to-ar7" -d 'Convert JSON back to AR7 configuration'
-complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version setup help" -f -a "check" -d 'Check AR7 configuration for syntax errors'
-complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version setup help" -f -a "format" -d 'Format AR7 configuration with canonical formatting'
-complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version setup help" -f -a "completions" -d 'Generate shell completion scripts'
-complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version setup help" -f -a "man" -d 'Generate man page'
-complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version setup help" -f -a "version" -d 'Show version information'
-complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version setup help" -f -a "setup" -d 'Create symlinks for short command names in the binary/'s directory'
-complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version setup help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "to-json" -d 'Convert AR7 configuration to JSON'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "to-ar7" -d 'Convert JSON back to AR7 configuration'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "check" -d 'Check AR7 configuration for syntax errors'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "format" -d 'Format AR7 configuration with canonical formatting'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "completions" -d 'Generate shell completion scripts'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "man" -d 'Generate man page'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "version" -d 'Show version information'
+complete -c ar7json -n "__fish_ar7json_using_subcommand help; and not __fish_seen_subcommand_from to-json to-ar7 check format completions man version help" -f -a "help" -d 'Print this message or the help of the given subcommand(s)'
 
 ```
 
@@ -786,7 +716,6 @@ Register-ArgumentCompleter -Native -CommandName 'ar7json' -ScriptBlock {
             [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate shell completion scripts')
             [CompletionResult]::new('man', 'man', [CompletionResultType]::ParameterValue, 'Generate man page')
             [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Show version information')
-            [CompletionResult]::new('setup', 'setup', [CompletionResultType]::ParameterValue, 'Create symlinks for short command names in the binary''s directory')
             [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Print this message or the help of the given subcommand(s)')
             break
         }
@@ -836,13 +765,6 @@ Register-ArgumentCompleter -Native -CommandName 'ar7json' -ScriptBlock {
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
-        'ar7json;setup' {
-            [CompletionResult]::new('-d', '-d', [CompletionResultType]::ParameterName, 'Directory to create symlinks in (defaults to the binary''s directory)')
-            [CompletionResult]::new('--dir', '--dir', [CompletionResultType]::ParameterName, 'Directory to create symlinks in (defaults to the binary''s directory)')
-            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
-            break
-        }
         'ar7json;help' {
             [CompletionResult]::new('to-json', 'to-json', [CompletionResultType]::ParameterValue, 'Convert AR7 configuration to JSON')
             [CompletionResult]::new('to-ar7', 'to-ar7', [CompletionResultType]::ParameterValue, 'Convert JSON back to AR7 configuration')
@@ -851,7 +773,6 @@ Register-ArgumentCompleter -Native -CommandName 'ar7json' -ScriptBlock {
             [CompletionResult]::new('completions', 'completions', [CompletionResultType]::ParameterValue, 'Generate shell completion scripts')
             [CompletionResult]::new('man', 'man', [CompletionResultType]::ParameterValue, 'Generate man page')
             [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Show version information')
-            [CompletionResult]::new('setup', 'setup', [CompletionResultType]::ParameterValue, 'Create symlinks for short command names in the binary''s directory')
             [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Print this message or the help of the given subcommand(s)')
             break
         }
@@ -874,9 +795,6 @@ Register-ArgumentCompleter -Native -CommandName 'ar7json' -ScriptBlock {
             break
         }
         'ar7json;help;version' {
-            break
-        }
-        'ar7json;help;setup' {
             break
         }
         'ar7json;help;help' {
@@ -923,7 +841,6 @@ set edit:completion:arg-completer[ar7json] = {|@words|
             cand completions 'Generate shell completion scripts'
             cand man 'Generate man page'
             cand version 'Show version information'
-            cand setup 'Create symlinks for short command names in the binary''s directory'
             cand help 'Print this message or the help of the given subcommand(s)'
         }
         &'ar7json;to-json'= {
@@ -965,12 +882,6 @@ set edit:completion:arg-completer[ar7json] = {|@words|
             cand -h 'Print help'
             cand --help 'Print help'
         }
-        &'ar7json;setup'= {
-            cand -d 'Directory to create symlinks in (defaults to the binary''s directory)'
-            cand --dir 'Directory to create symlinks in (defaults to the binary''s directory)'
-            cand -h 'Print help'
-            cand --help 'Print help'
-        }
         &'ar7json;help'= {
             cand to-json 'Convert AR7 configuration to JSON'
             cand to-ar7 'Convert JSON back to AR7 configuration'
@@ -979,7 +890,6 @@ set edit:completion:arg-completer[ar7json] = {|@words|
             cand completions 'Generate shell completion scripts'
             cand man 'Generate man page'
             cand version 'Show version information'
-            cand setup 'Create symlinks for short command names in the binary''s directory'
             cand help 'Print this message or the help of the given subcommand(s)'
         }
         &'ar7json;help;to-json'= {
@@ -995,8 +905,6 @@ set edit:completion:arg-completer[ar7json] = {|@words|
         &'ar7json;help;man'= {
         }
         &'ar7json;help;version'= {
-        }
-        &'ar7json;help;setup'= {
         }
         &'ar7json;help;help'= {
         }

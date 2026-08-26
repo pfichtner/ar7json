@@ -10,30 +10,21 @@ fn binary_path() -> std::path::PathBuf {
         .parent()
         .unwrap()
         .to_path_buf();
-    // When running tests, the binary is in target/debug/deps or target/debug.
-    // assert_cmd::Command::cargo_bin resolves this, but here we find it manually.
     path.push("ar7json");
     path
 }
 
+fn create_symlinks(dir: &std::path::Path) {
+    let bin = binary_path();
+    std::os::unix::fs::symlink(&bin, dir.join("ar7json")).unwrap();
+    for name in ar7json::SYMLINK_NAMES {
+        std::os::unix::fs::symlink("ar7json", dir.join(name)).unwrap();
+    }
+}
+
 fn setup_symlinks() -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
-    let bin = binary_path();
-
-    // Create "ar7json" symlink so env::current_exe() resolves inside the temp dir
-    std::os::unix::fs::symlink(&bin, dir.path().join("ar7json")).unwrap();
-
-    // Exercise the real setup code path
-    let output = Command::new(dir.path().join("ar7json"))
-        .args(["setup", "--dir", dir.path().to_str().unwrap()])
-        .output()
-        .unwrap();
-    assert!(
-        output.status.success(),
-        "ar7json setup failed: {}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-
+    create_symlinks(dir.path());
     dir
 }
 
@@ -71,8 +62,6 @@ fn ar7_to_json_converts_ar7_to_json() {
 fn ar7_to_json_with_output_flag() {
     let dir = setup_symlinks();
     let out = dir.path().join("out.json");
-    run_symlink(&dir, "ar7-to-json", &["tests/fixtures/minimal.ar7", "-o"]);
-    // -o requires a value; test with proper syntax
     let output = Command::new(dir.path().join("ar7-to-json"))
         .args(["tests/fixtures/minimal.ar7", "-o", out.to_str().unwrap()])
         .output()
@@ -217,7 +206,6 @@ fn ar7_fmt_matches_subcommand() {
 fn unknown_symlink_name_falls_through_to_normal_mode() {
     let dir = setup_symlinks();
     let unknown = dir.path().join("ar7json");
-    // Calling via the real binary name should work normally (subcommand mode)
     let output = Command::new(&unknown)
         .args(["to-json", "tests/fixtures/minimal.ar7"])
         .output()
@@ -225,117 +213,17 @@ fn unknown_symlink_name_falls_through_to_normal_mode() {
     assert!(output.status.success());
 }
 
-fn setup_binary_in_dir(dir: &std::path::Path) -> std::path::PathBuf {
-    let bin = binary_path();
-    let bin_dir = dir.join("bin");
-    fs::create_dir_all(&bin_dir).unwrap();
-    std::os::unix::fs::symlink(&bin, bin_dir.join("ar7json")).unwrap();
-
-    // Exercise the real setup code path
-    let output = Command::new(bin_dir.join("ar7json"))
-        .args(["setup", "--dir", bin_dir.to_str().unwrap()])
-        .output()
-        .unwrap();
-    assert!(
-        output.status.success(),
-        "ar7json setup failed: {}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-
-    bin_dir
-}
-
 #[test]
-fn setup_creates_symlinks_in_custom_dir() {
-    let dir = tempfile::tempdir().unwrap();
-    let bin_dir = setup_binary_in_dir(dir.path());
-
-    // setup_binary_in_dir already ran ar7json setup --dir bin_dir
-    // Verify symlinks exist and point to the real binary
-    for name in ["ar7-to-json", "json-to-ar7", "ar7-check", "ar7-fmt"] {
-        let link = bin_dir.join(name);
-        assert!(link.exists(), "symlink {} not created", name);
-        assert!(link.symlink_metadata().unwrap().file_type().is_symlink());
+fn symlink_names_match_ci_workflow() {
+    let workflow =
+        fs::read_to_string(".github/workflows/build.yml").expect("CI workflow must exist");
+    for name in ar7json::SYMLINK_NAMES {
+        let pattern = format!("ln -s ar7json {}", name);
+        assert!(
+            workflow.contains(&pattern),
+            "CI workflow missing symlink for '{}'. Expected a '{}' line in .github/workflows/build.yml",
+            name,
+            pattern,
+        );
     }
-}
-
-#[test]
-fn setup_creates_symlinks_in_default_dir() {
-    let dir = tempfile::tempdir().unwrap();
-    let bin = binary_path();
-    let bin_in_dir = dir.path().join("ar7json");
-    std::os::unix::fs::symlink(&bin, &bin_in_dir).unwrap();
-
-    let output = Command::new(&bin_in_dir)
-        .args(["setup", "--dir", dir.path().to_str().unwrap()])
-        .output()
-        .unwrap();
-    assert!(
-        output.status.success(),
-        "setup failed: {}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-
-    for name in ["ar7-to-json", "json-to-ar7", "ar7-check", "ar7-fmt"] {
-        let link = dir.path().join(name);
-        assert!(link.exists(), "symlink {} not created", name);
-    }
-}
-
-#[test]
-fn setup_overwrites_existing_symlinks() {
-    let dir = tempfile::tempdir().unwrap();
-    let bin_dir = dir.path().join("bin");
-    fs::create_dir_all(&bin_dir).unwrap();
-    let bin = binary_path();
-    std::os::unix::fs::symlink(&bin, bin_dir.join("ar7json")).unwrap();
-
-    // Create a stale symlink
-    std::os::unix::fs::symlink("/nonexistent", bin_dir.join("ar7-to-json")).unwrap();
-
-    let output = Command::new(bin_dir.join("ar7json"))
-        .args(["setup", "--dir", bin_dir.to_str().unwrap()])
-        .output()
-        .unwrap();
-    assert!(output.status.success());
-
-    // Should now point to ar7json (relative, same directory)
-    let link = bin_dir.join("ar7-to-json");
-    assert!(link.exists());
-    let target = fs::read_link(&link).unwrap();
-    assert_eq!(target.to_str().unwrap(), "ar7json");
-}
-
-#[test]
-fn setup_created_symlinks_are_usable() {
-    let dir = tempfile::tempdir().unwrap();
-    let bin_dir = setup_binary_in_dir(dir.path());
-
-    let json = Command::new(bin_dir.join("ar7-to-json"))
-        .arg("tests/fixtures/minimal.ar7")
-        .output()
-        .unwrap();
-    assert!(json.status.success());
-    let stdout = String::from_utf8(json.stdout).unwrap();
-    assert!(stdout.contains("\"encoding\""));
-}
-
-#[test]
-fn setup_stderr_output_shows_created_links() {
-    let dir = tempfile::tempdir().unwrap();
-    let bin = binary_path();
-    let bin_dir = dir.path().join("bin");
-    fs::create_dir_all(&bin_dir).unwrap();
-    std::os::unix::fs::symlink(&bin, bin_dir.join("ar7json")).unwrap();
-
-    let output = Command::new(bin_dir.join("ar7json"))
-        .args(["setup", "--dir", bin_dir.to_str().unwrap()])
-        .output()
-        .unwrap();
-    let stderr = String::from_utf8(output.stderr).unwrap();
-    assert!(stderr.contains("Created 4 symlinks"));
-    assert!(stderr.contains("ar7-to-json"));
-    assert!(stderr.contains("json-to-ar7"));
-    assert!(stderr.contains("ar7-check"));
-    assert!(stderr.contains("ar7-fmt"));
 }
