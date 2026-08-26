@@ -204,7 +204,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: ar7json-${{ github.ref_name }}-*
           path: artifacts/
