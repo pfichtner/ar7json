@@ -33,6 +33,69 @@ to JSON, the full power of these existing tools can be applied to FRITZ!Box conf
 and the results can be converted back to AR7 without loss. This avoids writing a new
 dedicated tool for every common operation.
 
+## Use Cases
+
+### Compare two router backups
+
+Export the configuration from your router twice (e.g., before and after a change),
+convert both to JSON, and diff them:
+
+```bash
+ar7json to-json old.ar7 -o old.json
+ar7json to-json new.ar7 -o new.json
+diff old.json new.json
+```
+
+Or use a structured diff tool like `delta` or `git diff` for readable output.
+
+### Bulk-edit configuration with jq
+
+Change a setting across the entire config without opening a GUI. For example, switch
+all DNS servers:
+
+```bash
+cat config.ar7 \
+  | ar7json to-json \
+  | jq '.document.entries[0].value.entries += [{ key: "dnsserver1", value: { type: "ip_address", value: "1.1.1.1" } }]' \
+  | ar7json to-ar7 -o config.ar7
+```
+
+### Version-control router configurations
+
+Store your router config in Git as JSON for meaningful diffs and a clear commit
+history. Restore by converting back:
+
+```bash
+ar7json to-json config.ar7 -o config.json
+git add config.json && git commit -m "disable guest wifi"
+
+# later, to restore:
+ar7json to-ar7 config.json -o config.ar7
+```
+
+### Validate before deploying
+
+Check for syntax errors in CI or deployment scripts before pushing a config to the
+router:
+
+```bash
+if ar7json check config.ar7; then
+  echo "Config is valid, deploying..."
+else
+  echo "Config has errors, aborting."
+  exit 1
+fi
+```
+
+### Inspect a config without the raw format
+
+Use the simplified JSON mode to get a clean, queryable view of your router's settings
+for documentation or exploration:
+
+```bash
+ar7json to-json --simple config.ar7 | jq .
+```
+
 ## Disclaimer
 
 **This project does not claim to be an official AVM implementation or specification of
