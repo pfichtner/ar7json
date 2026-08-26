@@ -136,7 +136,6 @@ jobs:
           Package: ar7json
           Version: $VERSION
           Architecture: $ARCH
-          Depends: \${misc:Depends}
           Maintainer: Peter Fichtner <1958485+pfichtner@users.noreply.github.com>
           Description: Standalone AR7 to JSON converter for AVM FRITZ!Box ar7.cfg configuration files
            Standalone converter between AVM FRITZ!Box ar7.cfg (AR7) format and JSON.
