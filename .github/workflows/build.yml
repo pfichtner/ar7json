@@ -136,7 +136,7 @@ jobs:
           Package: ar7json
           Version: $VERSION
           Architecture: $ARCH
-          Depends: ${misc:Depends}
+          Depends: \${misc:Depends}
           Maintainer: Peter Fichtner <1958485+pfichtner@users.noreply.github.com>
           Description: Standalone AR7 to JSON converter for AVM FRITZ!Box ar7.cfg configuration files
            Standalone converter between AVM FRITZ!Box ar7.cfg (AR7) format and JSON.
@@ -161,7 +161,8 @@ jobs:
             aarch64-unknown-linux-gnu) RPM_ARCH=aarch64 ;;
           esac
           RPM_DIR=$(mktemp -d)
-          mkdir -p "$RPM_DIR"/{BUILD,RPMS(noarch),SOURCES,SPECS,SRPMS}
+          mkdir -p "$RPM_DIR"/{BUILD,SOURCES,SPECS,SRPMS}
+          mkdir -p "$RPM_DIR/RPMS/noarch"
           cp "target/${{ matrix.target }}/release/ar7json" "$RPM_DIR/SOURCES/"
           cat > "$RPM_DIR/SPECS/ar7json.spec" <<EOF
           Name:           ar7json
