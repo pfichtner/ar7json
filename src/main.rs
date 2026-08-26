@@ -1,6 +1,7 @@
+use std::env;
 use std::fs;
 use std::io::{self, Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process;
 
 use clap::CommandFactory;
@@ -76,6 +77,13 @@ enum Commands {
 
     /// Show version information
     Version,
+
+    /// Create symlinks for short command names in the binary's directory
+    Setup {
+        /// Directory to create symlinks in (defaults to the binary's directory)
+        #[arg(short, long)]
+        dir: Option<PathBuf>,
+    },
 }
 
 fn read_input(input: &Option<PathBuf>) -> Result<String, Box<dyn std::error::Error>> {
@@ -102,9 +110,63 @@ fn write_output(output: &Option<PathBuf>, content: &str) -> Result<(), Box<dyn s
 }
 
 fn main() {
-    let cli = Cli::parse();
+    let result = match resolve_symlink_command() {
+        Some(cmd) => dispatch(cmd),
+        None => {
+            let cli = Cli::parse();
+            dispatch(cli.command)
+        }
+    };
 
-    let result = match cli.command {
+    match result {
+        Ok(()) => process::exit(0),
+        Err(e) => {
+            eprintln!("ar7json: {}", e);
+            process::exit(1);
+        }
+    }
+}
+
+fn resolve_symlink_command() -> Option<Commands> {
+    let arg0 = env::args().next()?;
+    let name = Path::new(&arg0)
+        .file_name()?
+        .to_str()?;
+
+    let args: Vec<String> = env::args().skip(1).collect();
+    let mut output = None;
+    let mut input = None;
+    let mut simple = false;
+
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "-o" | "--output" => {
+                i += 1;
+                output = args.get(i).map(PathBuf::from);
+            }
+            "--simple" => simple = true,
+            _ if input.is_none() => input = Some(PathBuf::from(&args[i])),
+            _ => {}
+        }
+        i += 1;
+    }
+
+    match name {
+        "ar7-to-json" => Some(Commands::ToJson {
+            input,
+            output,
+            simple,
+        }),
+        "json-to-ar7" => Some(Commands::ToAr7 { input, output }),
+        "ar7-check" => Some(Commands::Check { input }),
+        "ar7-fmt" => Some(Commands::Format { input, output }),
+        _ => None,
+    }
+}
+
+fn dispatch(cmd: Commands) -> Result<(), Box<dyn std::error::Error>> {
+    match cmd {
         Commands::ToJson {
             input,
             output,
@@ -119,14 +181,7 @@ fn main() {
             println!("ar7json {}", env!("CARGO_PKG_VERSION"));
             Ok(())
         }
-    };
-
-    match result {
-        Ok(()) => process::exit(0),
-        Err(e) => {
-            eprintln!("ar7json: {}", e);
-            process::exit(1);
-        }
+        Commands::Setup { dir } => cmd_setup(dir.as_ref()),
     }
 }
 
@@ -203,5 +258,46 @@ fn cmd_man(output: &Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
     let mut buf = Vec::new();
     clap_mangen::Man::new(Cli::command()).render(&mut buf)?;
     write_output(output, &String::from_utf8(buf)?)?;
+    Ok(())
+}
+
+const SYMLINK_NAMES: &[&str] = &["ar7-to-json", "json-to-ar7", "ar7-check", "ar7-fmt"];
+
+fn cmd_setup(dir: Option<&PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
+    let target_dir = match dir {
+        Some(d) => d.clone(),
+        None => env::current_exe()?
+            .parent()
+            .ok_or("cannot determine binary directory")?
+            .to_path_buf(),
+    };
+
+    let exe = env::current_exe()?;
+    let exe_name = exe
+        .file_name()
+        .ok_or("cannot determine binary name")?
+        .to_os_string();
+
+    fs::create_dir_all(&target_dir)?;
+
+    let mut created = Vec::new();
+
+    for name in SYMLINK_NAMES {
+        let link_path = target_dir.join(name);
+        if link_path.exists() || link_path.symlink_metadata().is_ok() {
+            fs::remove_file(&link_path)?;
+        }
+        #[cfg(unix)]
+        std::os::unix::fs::symlink(&exe_name, &link_path)?;
+        #[cfg(not(unix))]
+        fs::copy(&exe, &link_path)?;
+        created.push(name);
+    }
+
+    eprintln!("Created {} symlinks in {}:", created.len(), target_dir.display());
+    for name in &created {
+        eprintln!("  {} -> {}", name, exe.display());
+    }
+
     Ok(())
 }

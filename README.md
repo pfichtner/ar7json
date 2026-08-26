@@ -108,11 +108,20 @@ real-world configuration files. AR7 is a proprietary format owned by FRITZ! GmbH
 
 ```bash
 cargo install --path .
+ar7json setup
 ```
+
+`ar7json setup` creates symlinks for shorter command names (`ar7-to-json`, `json-to-ar7`,
+`ar7-check`, `ar7-fmt`) in the same directory as the binary. Use `--dir` to specify a
+different target directory.
 
 ### Pre-built binaries
 
-Download from the releases page for your platform.
+Download from the releases page for your platform, then run:
+
+```bash
+ar7json setup
+```
 
 ## Building
 
@@ -123,6 +132,25 @@ cargo build --release
 The binary is at `target/release/ar7json`.
 
 ## Usage
+
+### Short commands (via symlinks)
+
+Run `ar7json setup` during installation to create shorter command names. These are
+symlinks to the main binary and accept the same flags:
+
+| Subcommand | Symlink |
+|------------|---------|
+| `ar7json to-json` | `ar7-to-json` |
+| `ar7json to-ar7` | `json-to-ar7` |
+| `ar7json check` | `ar7-check` |
+| `ar7json format` | `ar7-fmt` |
+
+```bash
+ar7-to-json config.ar7 -o config.json
+json-to-ar7 config.json -o config.ar7
+ar7-check config.ar7
+ar7-fmt config.ar7 -o formatted.ar7
+```
 
 ### Convert AR7 to JSON (lossless, canonical format)
 
