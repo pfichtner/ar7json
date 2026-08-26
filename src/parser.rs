@@ -475,7 +475,7 @@ impl<'a> Parser<'a> {
         Ar7Error::unexpected_eof(
             expected.to_vec(),
             self.source.to_string(),
-            miette::SourceSpan::new(pos.into(), 0.into()),
+            miette::SourceSpan::new(pos.into(), 0usize),
         )
     }
 }
