@@ -20,8 +20,31 @@ jobs:
       - name: Run tests
         run: cargo test
 
-  build:
+  completions:
     needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Generate shell completions
+        run: |
+          cargo build
+          mkdir -p completions
+          ./target/debug/ar7json completions bash > completions/ar7json.bash
+          ./target/debug/ar7json completions zsh > completions/_ar7json
+          ./target/debug/ar7json completions fish > completions/ar7json.fish
+          ./target/debug/ar7json completions powershell > completions/ar7json.powershell
+          ./target/debug/ar7json completions elvish > completions/ar7json.elvish
+      - name: Upload completions
+        uses: actions/upload-artifact@v7
+        with:
+          name: shell-completions
+          path: completions/
+          retention-days: 14
+
+  build:
+    needs: [test, completions]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -62,6 +85,11 @@ jobs:
             use-cross: false
     steps:
       - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: shell-completions
+          path: completions/
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -104,14 +132,15 @@ jobs:
         run: |
           cd target/${{ matrix.target }}/release
           tar czf ../../../ar7json-${{ github.ref_name }}-${{ matrix.target }}.tar.gz \
-            ar7json ar7-to-json json-to-ar7 ar7-check ar7-fmt
+            ar7json ar7-to-json json-to-ar7 ar7-check ar7-fmt \
+            -C "$GITHUB_WORKSPACE" completions/
 
       - name: Create archive (windows)
         if: startsWith(github.ref, 'refs/tags/') && runner.os == 'Windows'
         shell: pwsh
         run: |
           cd target/${{ matrix.target }}/release
-          Compress-Archive -Path ar7json.exe -DestinationPath ../../../ar7json-${{ github.ref_name }}-${{ matrix.target }}.zip
+          Compress-Archive -Path ar7json.exe,"$env:GITHUB_WORKSPACE/completions/ar7json.powershell" -DestinationPath ../../../ar7json-${{ github.ref_name }}-${{ matrix.target }}.zip
 
       - name: Build Debian package
         if: startsWith(github.ref, 'refs/tags/') && matrix.make-deb
@@ -132,6 +161,12 @@ jobs:
           ln -s ar7json ar7-check
           ln -s ar7json ar7-fmt
           cd ../../..
+          mkdir -p "$PKG_DIR/usr/share/bash-completion/completions"
+          mkdir -p "$PKG_DIR/usr/share/zsh/vendor-completions"
+          mkdir -p "$PKG_DIR/usr/share/fish/vendor_completions.d"
+          cp "$GITHUB_WORKSPACE/completions/ar7json.bash" "$PKG_DIR/usr/share/bash-completion/completions/ar7json"
+          cp "$GITHUB_WORKSPACE/completions/_ar7json" "$PKG_DIR/usr/share/zsh/vendor-completions/_ar7json"
+          cp "$GITHUB_WORKSPACE/completions/ar7json.fish" "$PKG_DIR/usr/share/fish/vendor_completions.d/ar7json.fish"
           cat > "$PKG_DIR/DEBIAN/control" <<EOF
           Package: ar7json
           Version: $VERSION
@@ -163,6 +198,9 @@ jobs:
           mkdir -p "$RPM_DIR"/{BUILD,SOURCES,SPECS,SRPMS}
           mkdir -p "$RPM_DIR/RPMS/noarch"
           cp "target/${{ matrix.target }}/release/ar7json" "$RPM_DIR/SOURCES/"
+          cp "$GITHUB_WORKSPACE/completions/ar7json.bash" "$RPM_DIR/SOURCES/ar7json.bash"
+          cp "$GITHUB_WORKSPACE/completions/_ar7json" "$RPM_DIR/SOURCES/_ar7json"
+          cp "$GITHUB_WORKSPACE/completions/ar7json.fish" "$RPM_DIR/SOURCES/ar7json.fish"
           cat > "$RPM_DIR/SPECS/ar7json.spec" <<EOF
           Name:           ar7json
           Version:        $VERSION
@@ -180,12 +218,21 @@ jobs:
           ln -s ar7json json-to-ar7
           ln -s ar7json ar7-check
           ln -s ar7json ar7-fmt
+          mkdir -p %{buildroot}/usr/share/bash-completion/completions
+          mkdir -p %{buildroot}/usr/share/zsh/vendor-completions
+          mkdir -p %{buildroot}/usr/share/fish/vendor_completions.d
+          cp %{_sourcedir}/ar7json.bash %{buildroot}/usr/share/bash-completion/completions/ar7json
+          cp %{_sourcedir}/_ar7json %{buildroot}/usr/share/zsh/vendor-completions/_ar7json
+          cp %{_sourcedir}/ar7json.fish %{buildroot}/usr/share/fish/vendor_completions.d/ar7json.fish
           %files
           %attr(755,root,root) /usr/bin/ar7json
           /usr/bin/ar7-to-json
           /usr/bin/json-to-ar7
           /usr/bin/ar7-check
           /usr/bin/ar7-fmt
+          /usr/share/bash-completion/completions/ar7json
+          /usr/share/zsh/vendor-completions/_ar7json
+          /usr/share/fish/vendor_completions.d/ar7json.fish
           EOF
           rpmbuild -bb --define "_topdir $RPM_DIR" --target "$RPM_ARCH" "$RPM_DIR/SPECS/ar7json.spec"
           cp "$RPM_DIR/RPMS/$RPM_ARCH"/ar7json-*.rpm "ar7json-${{ github.ref_name }}-${{ matrix.target }}.rpm"
