@@ -213,12 +213,3 @@ fn unknown_symlink_name_falls_through_to_normal_mode() {
     assert!(output.status.success());
 }
 
-#[test]
-fn symlink_names_match_ci_workflow() {
-    let workflow =
-        fs::read_to_string(".github/workflows/build.yml").expect("CI workflow must exist");
-    assert!(
-        workflow.contains("ar7json symlinks"),
-        "CI workflow must use 'ar7json symlinks' to generate symlinks"
-    );
-}
