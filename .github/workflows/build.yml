@@ -30,16 +30,9 @@ jobs:
       - name: Generate shell completions
         run: |
           cargo build
-          mkdir -p completions
-          ./target/debug/ar7json completions bash > completions/ar7json.bash
-          ./target/debug/ar7json completions zsh > completions/_ar7json
-          ./target/debug/ar7json completions fish > completions/ar7json.fish
-          ./target/debug/ar7json completions powershell > completions/ar7json.powershell
-          ./target/debug/ar7json completions elvish > completions/ar7json.elvish
+          ./scripts/generate-completions.sh ./target/debug/ar7json
       - name: Generate binary aliases
-        run: |
-          mkdir -p symlinks
-          ./target/debug/ar7json symlinks > symlinks/symlinks
+        run: ./scripts/generate-symlinks.sh ./target/debug/ar7json
       - name: Upload completions
         uses: actions/upload-artifact@v7
         with:
@@ -141,54 +134,16 @@ jobs:
 
       - name: Create archive (unix)
         if: startsWith(github.ref, 'refs/tags/') && runner.os != 'Windows'
-        run: |
-          cd target/${{ matrix.target }}/release
-          tar czf ../../../ar7json-${{ github.ref_name }}-${{ matrix.target }}.tar.gz \
-            ar7json ar7-to-json json-to-ar7 ar7-check ar7-fmt \
-            -C "$GITHUB_WORKSPACE" completions/
+        run: ./scripts/create-archive-unix.sh "${{ matrix.target }}" "${{ github.ref_name }}" "$GITHUB_WORKSPACE"
 
       - name: Create archive (windows)
         if: startsWith(github.ref, 'refs/tags/') && runner.os == 'Windows'
         shell: pwsh
-        run: |
-          cd target/${{ matrix.target }}/release
-          Compress-Archive -Path ar7json.exe,"$env:GITHUB_WORKSPACE/completions/ar7json.powershell" -DestinationPath ../../../ar7json-${{ github.ref_name }}-${{ matrix.target }}.zip
+        run: ./scripts/create-archive-windows.ps1 "${{ matrix.target }}" "${{ github.ref_name }}" "$env:GITHUB_WORKSPACE"
 
       - name: Build Debian package
         if: startsWith(github.ref, 'refs/tags/') && matrix.make-deb
-        run: |
-          VERSION="${{ github.ref_name }}"
-          VERSION="${VERSION#v}"
-          case "${{ matrix.target }}" in
-            x86_64-unknown-linux-gnu)     ARCH=amd64 ;;
-            aarch64-unknown-linux-gnu)    ARCH=arm64 ;;
-            armv7-unknown-linux-gnueabihf) ARCH=armhf ;;
-          esac
-          PKG_DIR="ar7json_${VERSION}_${ARCH}"
-          mkdir -p "$PKG_DIR/DEBIAN" "$PKG_DIR/usr/bin"
-          cp "target/${{ matrix.target }}/release/ar7json" "$PKG_DIR/usr/bin/"
-          cd "$PKG_DIR/usr/bin"
-          while read name; do ln -s ar7json "$name"; done < "$GITHUB_WORKSPACE/symlinks/symlinks"
-          cd ../../..
-          mkdir -p "$PKG_DIR/usr/share/bash-completion/completions"
-          mkdir -p "$PKG_DIR/usr/share/zsh/vendor-completions"
-          mkdir -p "$PKG_DIR/usr/share/fish/vendor_completions.d"
-          cp "$GITHUB_WORKSPACE/completions/ar7json.bash" "$PKG_DIR/usr/share/bash-completion/completions/ar7json"
-          cp "$GITHUB_WORKSPACE/completions/_ar7json" "$PKG_DIR/usr/share/zsh/vendor-completions/_ar7json"
-          cp "$GITHUB_WORKSPACE/completions/ar7json.fish" "$PKG_DIR/usr/share/fish/vendor_completions.d/ar7json.fish"
-          cat > "$PKG_DIR/DEBIAN/control" <<EOF
-          Package: ar7json
-          Version: $VERSION
-          Architecture: $ARCH
-          Maintainer: Peter Fichtner <1958485+pfichtner@users.noreply.github.com>
-          Description: Standalone AR7 to JSON converter for AVM FRITZ!Box ar7.cfg configuration files
-           Standalone converter between AVM FRITZ!Box ar7.cfg (AR7) format and JSON.
-           Parses AVM export files including the header and produces round-trip-safe
-           output in both directions.
-          Section: utils
-          Priority: optional
-          EOF
-          dpkg-deb --build "$PKG_DIR" "ar7json-${{ github.ref_name }}-${{ matrix.target }}.deb"
+        run: ./scripts/build-deb.sh "${{ matrix.target }}" "${{ github.ref_name }}" "$GITHUB_WORKSPACE"
 
       - name: Install rpm-build
         if: startsWith(github.ref, 'refs/tags/') && matrix.make-rpm
@@ -196,53 +151,7 @@ jobs:
 
       - name: Build RPM package
         if: startsWith(github.ref, 'refs/tags/') && matrix.make-rpm
-        run: |
-          VERSION="${{ github.ref_name }}"
-          VERSION="${VERSION#v}"
-          case "${{ matrix.target }}" in
-            x86_64-unknown-linux-gnu)  RPM_ARCH=x86_64 ;;
-            aarch64-unknown-linux-gnu) RPM_ARCH=aarch64 ;;
-          esac
-          RPM_DIR=$(mktemp -d)
-          mkdir -p "$RPM_DIR"/{BUILD,SOURCES,SPECS,SRPMS}
-          mkdir -p "$RPM_DIR/RPMS/noarch"
-          cp "target/${{ matrix.target }}/release/ar7json" "$RPM_DIR/SOURCES/"
-          cp "$GITHUB_WORKSPACE/completions/ar7json.bash" "$RPM_DIR/SOURCES/ar7json.bash"
-          cp "$GITHUB_WORKSPACE/completions/_ar7json" "$RPM_DIR/SOURCES/_ar7json"
-          cp "$GITHUB_WORKSPACE/completions/ar7json.fish" "$RPM_DIR/SOURCES/ar7json.fish"
-          cp "$GITHUB_WORKSPACE/symlinks/symlinks" "$RPM_DIR/SOURCES/symlinks"
-          cat > "$RPM_DIR/SPECS/ar7json.spec" <<EOF
-          Name:           ar7json
-          Version:        $VERSION
-          Release:        1
-          Summary:        Standalone AR7 to JSON converter for AVM FRITZ!Box ar7.cfg configuration files
-          License:        MIT
-          URL:            https://github.com/pfichtner/ar7json
-          %description
-          Standalone converter between AVM FRITZ!Box ar7.cfg (AR7) format and JSON.
-          %install
-          mkdir -p %{buildroot}/usr/bin
-          cp %{_sourcedir}/ar7json %{buildroot}/usr/bin/ar7json
-          cd %{buildroot}/usr/bin
-          while read name; do ln -s ar7json "\$name"; done < %{_sourcedir}/symlinks
-          mkdir -p %{buildroot}/usr/share/bash-completion/completions
-          mkdir -p %{buildroot}/usr/share/zsh/vendor-completions
-          mkdir -p %{buildroot}/usr/share/fish/vendor_completions.d
-          cp %{_sourcedir}/ar7json.bash %{buildroot}/usr/share/bash-completion/completions/ar7json
-          cp %{_sourcedir}/_ar7json %{buildroot}/usr/share/zsh/vendor-completions/_ar7json
-          cp %{_sourcedir}/ar7json.fish %{buildroot}/usr/share/fish/vendor_completions.d/ar7json.fish
-          %files
-          %attr(755,root,root) /usr/bin/ar7json
-          /usr/bin/ar7-to-json
-          /usr/bin/json-to-ar7
-          /usr/bin/ar7-check
-          /usr/bin/ar7-fmt
-          /usr/share/bash-completion/completions/ar7json
-          /usr/share/zsh/vendor-completions/_ar7json
-          /usr/share/fish/vendor_completions.d/ar7json.fish
-          EOF
-          rpmbuild -bb --define "_topdir $RPM_DIR" --target "$RPM_ARCH" "$RPM_DIR/SPECS/ar7json.spec"
-          cp "$RPM_DIR/RPMS/$RPM_ARCH"/ar7json-*.rpm "ar7json-${{ github.ref_name }}-${{ matrix.target }}.rpm"
+        run: ./scripts/build-rpm.sh "${{ matrix.target }}" "${{ github.ref_name }}" "$GITHUB_WORKSPACE"
 
       - name: Upload archive
         if: startsWith(github.ref, 'refs/tags/')
@@ -265,11 +174,7 @@ jobs:
           merge-multiple: true
 
       - name: Generate checksums
-        run: |
-          cd artifacts
-          for f in *; do
-            sha256sum "$f" >> "${{ github.ref_name }}-SHA256SUMS.txt"
-          done
+        run: ./scripts/generate-checksums.sh "${{ github.ref_name }}" artifacts
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
