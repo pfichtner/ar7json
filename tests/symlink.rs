@@ -217,13 +217,8 @@ fn unknown_symlink_name_falls_through_to_normal_mode() {
 fn symlink_names_match_ci_workflow() {
     let workflow =
         fs::read_to_string(".github/workflows/build.yml").expect("CI workflow must exist");
-    for name in ar7json::SYMLINK_NAMES {
-        let pattern = format!("ln -s ar7json {}", name);
-        assert!(
-            workflow.contains(&pattern),
-            "CI workflow missing symlink for '{}'. Expected a '{}' line in .github/workflows/build.yml",
-            name,
-            pattern,
-        );
-    }
+    assert!(
+        workflow.contains("ar7json symlinks"),
+        "CI workflow must use 'ar7json symlinks' to generate symlinks"
+    );
 }

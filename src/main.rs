@@ -4,6 +4,7 @@ use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process;
 
+use ar7json::SYMLINK_NAMES;
 use clap::CommandFactory;
 use clap::Parser;
 use clap::Subcommand;
@@ -74,6 +75,9 @@ enum Commands {
         #[arg(short, long)]
         output: Option<PathBuf>,
     },
+
+    /// Print supported symlink names
+    Symlinks,
 
     /// Show version information
     Version,
@@ -170,6 +174,7 @@ fn dispatch(cmd: Commands) -> Result<(), Box<dyn std::error::Error>> {
         Commands::Format { input, output } => cmd_format(&input, &output),
         Commands::Completions { shell, output } => cmd_completions(shell, &output),
         Commands::Man { output } => cmd_man(&output),
+        Commands::Symlinks => cmd_symlinks(),
         Commands::Version => {
             println!("ar7json {}", env!("CARGO_PKG_VERSION"));
             Ok(())
@@ -250,6 +255,13 @@ fn cmd_man(output: &Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
     let mut buf = Vec::new();
     clap_mangen::Man::new(Cli::command()).render(&mut buf)?;
     write_output(output, &String::from_utf8(buf)?)?;
+    Ok(())
+}
+
+fn cmd_symlinks() -> Result<(), Box<dyn std::error::Error>> {
+    for name in SYMLINK_NAMES {
+        println!("{}", name);
+    }
     Ok(())
 }
 

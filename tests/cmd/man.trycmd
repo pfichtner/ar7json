@@ -38,6 +38,9 @@ Generate shell completion scripts
 ar7json/-man(1)
 Generate man page
 .TP
+ar7json/-symlinks(1)
+Print supported symlink names
+.TP
 ar7json/-version(1)
 Show version information
 .TP

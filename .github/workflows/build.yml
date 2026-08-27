@@ -36,6 +36,7 @@ jobs:
           ./target/debug/ar7json completions fish > completions/ar7json.fish
           ./target/debug/ar7json completions powershell > completions/ar7json.powershell
           ./target/debug/ar7json completions elvish > completions/ar7json.elvish
+          ./target/debug/ar7json symlinks > completions/symlinks
       - name: Upload completions
         uses: actions/upload-artifact@v7
         with:
@@ -122,10 +123,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') && runner.os != 'Windows'
         run: |
           cd target/${{ matrix.target }}/release
-          ln -s ar7json ar7-to-json
-          ln -s ar7json json-to-ar7
-          ln -s ar7json ar7-check
-          ln -s ar7json ar7-fmt
+          while read name; do ln -s ar7json "$name"; done < "$GITHUB_WORKSPACE/completions/symlinks"
 
       - name: Create archive (unix)
         if: startsWith(github.ref, 'refs/tags/') && runner.os != 'Windows'
@@ -156,10 +154,7 @@ jobs:
           mkdir -p "$PKG_DIR/DEBIAN" "$PKG_DIR/usr/bin"
           cp "target/${{ matrix.target }}/release/ar7json" "$PKG_DIR/usr/bin/"
           cd "$PKG_DIR/usr/bin"
-          ln -s ar7json ar7-to-json
-          ln -s ar7json json-to-ar7
-          ln -s ar7json ar7-check
-          ln -s ar7json ar7-fmt
+          while read name; do ln -s ar7json "$name"; done < "$GITHUB_WORKSPACE/completions/symlinks"
           cd ../../..
           mkdir -p "$PKG_DIR/usr/share/bash-completion/completions"
           mkdir -p "$PKG_DIR/usr/share/zsh/vendor-completions"
@@ -201,6 +196,7 @@ jobs:
           cp "$GITHUB_WORKSPACE/completions/ar7json.bash" "$RPM_DIR/SOURCES/ar7json.bash"
           cp "$GITHUB_WORKSPACE/completions/_ar7json" "$RPM_DIR/SOURCES/_ar7json"
           cp "$GITHUB_WORKSPACE/completions/ar7json.fish" "$RPM_DIR/SOURCES/ar7json.fish"
+          cp "$GITHUB_WORKSPACE/completions/symlinks" "$RPM_DIR/SOURCES/symlinks"
           cat > "$RPM_DIR/SPECS/ar7json.spec" <<EOF
           Name:           ar7json
           Version:        $VERSION
@@ -214,10 +210,7 @@ jobs:
           mkdir -p %{buildroot}/usr/bin
           cp %{_sourcedir}/ar7json %{buildroot}/usr/bin/ar7json
           cd %{buildroot}/usr/bin
-          ln -s ar7json ar7-to-json
-          ln -s ar7json json-to-ar7
-          ln -s ar7json ar7-check
-          ln -s ar7json ar7-fmt
+          while read name; do ln -s ar7json "\$name"; done < %{_sourcedir}/symlinks
           mkdir -p %{buildroot}/usr/share/bash-completion/completions
           mkdir -p %{buildroot}/usr/share/zsh/vendor-completions
           mkdir -p %{buildroot}/usr/share/fish/vendor_completions.d

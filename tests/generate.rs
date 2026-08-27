@@ -109,3 +109,34 @@ fn man_output_file_writes_page() {
     let content = fs::read_to_string(&path).unwrap();
     assert!(content.contains(".TH ar7json 1"));
 }
+
+#[test]
+fn symlinks_lists_all_names() {
+    let stdout = cmd()
+        .arg("symlinks")
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let stdout = String::from_utf8(stdout).unwrap();
+    let names: Vec<&str> = stdout.lines().collect();
+    assert_eq!(
+        names,
+        vec!["ar7-to-json", "json-to-ar7", "ar7-check", "ar7-fmt"]
+    );
+}
+
+#[test]
+fn symlinks_matches_symlink_names_constant() {
+    let stdout = cmd()
+        .arg("symlinks")
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let stdout = String::from_utf8(stdout).unwrap();
+    let names: Vec<&str> = stdout.lines().collect();
+    assert_eq!(names, ar7json::SYMLINK_NAMES);
+}
