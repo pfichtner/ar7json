@@ -102,8 +102,8 @@ mod tests {
         assert!(matches!(doc.entries[0].value, Value::String(_)));
         assert!(matches!(doc.entries[1].value, Value::Integer(_)));
         assert!(matches!(doc.entries[2].value, Value::Integer(_)));
-        assert!(matches!(doc.entries[3].value, Value::Boolean(ref b) if b.value == true));
-        assert!(matches!(doc.entries[4].value, Value::Boolean(ref b) if b.value == false));
+        assert!(matches!(doc.entries[3].value, Value::Boolean(ref b) if b.value));
+        assert!(matches!(doc.entries[4].value, Value::Boolean(ref b) if !b.value));
         assert!(matches!(doc.entries[5].value, Value::Duration(_)));
         assert!(matches!(doc.entries[6].value, Value::Identifier(_)));
         assert!(matches!(doc.entries[7].value, Value::Number(_)));

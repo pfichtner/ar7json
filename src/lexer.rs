@@ -117,9 +117,7 @@ impl<'a> Lexer<'a> {
                 b';' => self.add_token(TokenKind::Semicolon, 1),
                 b'"' => self.read_string()?,
                 b'0'..=b'9' | b'-' => {
-                    if self.looks_like_mac_from_start() {
-                        self.read_identifier()?;
-                    } else if self.looks_like_ipv6_from_start() {
+                    if self.looks_like_mac_from_start() || self.looks_like_ipv6_from_start() {
                         self.read_identifier()?;
                     } else {
                         self.read_number_or_duration()?;

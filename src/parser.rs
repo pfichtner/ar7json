@@ -466,7 +466,7 @@ impl<'a> Parser<'a> {
             expected.to_vec(),
             found,
             self.source.to_string(),
-            miette::SourceSpan::new(span.start.into(), (span.end - span.start).into()),
+            miette::SourceSpan::new(span.start.into(), span.end - span.start),
         )
     }
 

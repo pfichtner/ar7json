@@ -66,10 +66,10 @@ fn serialize_entry(output: &mut String, entry: &Entry, depth: usize) -> Result<(
         match t {
             Trivia::Whitespace(_) => {}
             Trivia::LineComment(s) => {
-                write!(output, "{}//{}\n", indent, s).unwrap();
+                writeln!(output, "{}//{}", indent, s).unwrap();
             }
             Trivia::BlockComment(s) => {
-                write!(output, "{}/*{}*/\n", indent, s).unwrap();
+                writeln!(output, "{}/*{}*/", indent, s).unwrap();
             }
         }
     }
