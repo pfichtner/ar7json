@@ -192,4 +192,37 @@ mod tests {
         assert_eq!(lbrace_count, 2);
         assert_eq!(rbrace_count, 2);
     }
+
+    #[test]
+    fn unterminated_string() {
+        let mut lexer = Lexer::new(r#""hello"#);
+        let result = lexer.tokenize();
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ar7json::lexer::LexerError::UnterminatedString { .. }
+        ));
+    }
+
+    #[test]
+    fn unterminated_string_escape() {
+        let mut lexer = Lexer::new(r#""hello\"#);
+        let result = lexer.tokenize();
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ar7json::lexer::LexerError::UnterminatedStringEscape { .. }
+        ));
+    }
+
+    #[test]
+    fn unterminated_block_comment() {
+        let mut lexer = Lexer::new("/* unterminated");
+        let result = lexer.tokenize();
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ar7json::lexer::LexerError::UnterminatedBlockComment { .. }
+        ));
+    }
 }

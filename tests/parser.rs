@@ -178,4 +178,24 @@ ar7cfg {
         assert_eq!(doc.entries[0].key, "meta");
         assert_eq!(doc.entries[1].key, "foo");
     }
+
+    #[test]
+    fn unclosed_block_accepted() {
+        let doc = parse("block { key = 1").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        assert_eq!(doc.entries[0].key, "block");
+    }
+
+    #[test]
+    fn unexpected_token_after_key() {
+        let result = parse("key 42");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn boolean_as_key() {
+        let doc = parse("yes = 42;").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        assert_eq!(doc.entries[0].key, "yes");
+    }
 }

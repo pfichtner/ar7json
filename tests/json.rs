@@ -248,4 +248,144 @@ mod tests {
         }));
         assert!(result.is_err());
     }
+
+    #[test]
+    fn root_not_an_object_rejected() {
+        let result = json_to_document(&serde_json::json!("just a string"));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn root_array_rejected() {
+        let result = json_to_document(&serde_json::json!([1, 2, 3]));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn missing_format_field_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "version": 1,
+            "document": { "entries": [] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn missing_version_field_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "document": { "entries": [] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn missing_document_field_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn document_not_an_object_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": "not an object"
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn document_missing_entries_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": {}
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn entries_not_an_array_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": "not an array" }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn entry_not_an_object_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [42] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn entry_missing_key_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "value": { "type": "integer", "value": 1, "raw": "1" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn entry_missing_value_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{ "key": "foo" }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn value_not_an_object_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "foo",
+                "value": "not an object"
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn value_missing_type_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "foo",
+                "value": { "value": "hello" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn unknown_value_type_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "foo",
+                "value": { "type": "bogus", "value": "x" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
 }
