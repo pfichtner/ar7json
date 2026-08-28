@@ -15,4 +15,4 @@ $releaseDir = "target/$Target/release"
 $output = "ar7json-$Version-$Target.zip"
 
 Set-Location $releaseDir
-Compress-Archive -Path "ar7json.exe","$Workspace/completions/ar7json.powershell","$Workspace/man/ar7json.1" -DestinationPath "../../../$output"
+Compress-Archive -Path "ar7json.exe","$Workspace/generated/completions/ar7json.powershell","$Workspace/generated/man/ar7json.1" -DestinationPath "../../../$output"

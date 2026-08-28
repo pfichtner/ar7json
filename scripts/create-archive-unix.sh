@@ -16,4 +16,4 @@ OUTPUT="ar7json-${VERSION}-${TARGET}.tar.gz"
 cd "$RELEASE_DIR"
 tar czf "../../../${OUTPUT}" \
     ar7json ar7-to-json json-to-ar7 ar7-check ar7-fmt \
-    -C "${WORKSPACE}" completions/ man/
+    -C "${WORKSPACE}/generated" completions/ man/

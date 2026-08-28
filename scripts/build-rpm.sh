@@ -28,11 +28,11 @@ mkdir -p "$RPM_DIR"/{BUILD,SOURCES,SPECS,SRPMS}
 mkdir -p "$RPM_DIR/RPMS/noarch"
 
 cp "target/${TARGET}/release/ar7json" "$RPM_DIR/SOURCES/"
-cp "${WORKSPACE}/completions/ar7json.bash" "$RPM_DIR/SOURCES/ar7json.bash"
-cp "${WORKSPACE}/completions/_ar7json" "$RPM_DIR/SOURCES/_ar7json"
-cp "${WORKSPACE}/completions/ar7json.fish" "$RPM_DIR/SOURCES/ar7json.fish"
-cp "${WORKSPACE}/man/ar7json.1" "$RPM_DIR/SOURCES/ar7json.1"
-cp "${WORKSPACE}/symlinks/symlinks" "$RPM_DIR/SOURCES/symlinks"
+cp "${WORKSPACE}/generated/completions/ar7json.bash" "$RPM_DIR/SOURCES/ar7json.bash"
+cp "${WORKSPACE}/generated/completions/_ar7json" "$RPM_DIR/SOURCES/_ar7json"
+cp "${WORKSPACE}/generated/completions/ar7json.fish" "$RPM_DIR/SOURCES/ar7json.fish"
+cp "${WORKSPACE}/generated/man/ar7json.1" "$RPM_DIR/SOURCES/ar7json.1"
+cp "${WORKSPACE}/generated/symlinks/symlinks" "$RPM_DIR/SOURCES/symlinks"
 
 cat > "$RPM_DIR/SPECS/ar7json.spec" <<EOF
 Name:           ar7json

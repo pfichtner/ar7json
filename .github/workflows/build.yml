@@ -20,7 +20,7 @@ jobs:
       - name: Run tests
         run: cargo test
 
-  completions:
+  generate:
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -35,27 +35,18 @@ jobs:
         run: ./scripts/generate-symlinks.sh ./target/debug/ar7json
       - name: Generate man page
         run: ./scripts/generate-man.sh ./target/debug/ar7json
-      - name: Upload completions
+      - name: Upload generated assets
         uses: actions/upload-artifact@v7
         with:
-          name: shell-completions
-          path: completions/
-          retention-days: 14
-      - name: Upload binary aliases
-        uses: actions/upload-artifact@v7
-        with:
-          name: binary-aliases
-          path: symlinks/
-          retention-days: 14
-      - name: Upload man page
-        uses: actions/upload-artifact@v7
-        with:
-          name: man-page
-          path: man/
+          name: generated
+          path: |
+            completions/
+            symlinks/
+            man/
           retention-days: 14
 
   build:
-    needs: [test, completions]
+    needs: [test, generate]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -99,18 +90,8 @@ jobs:
 
       - uses: actions/download-artifact@v8
         with:
-          name: shell-completions
-          path: completions/
-
-      - uses: actions/download-artifact@v8
-        with:
-          name: binary-aliases
-          path: symlinks/
-
-      - uses: actions/download-artifact@v8
-        with:
-          name: man-page
-          path: man/
+          name: generated
+          path: generated/
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -143,7 +124,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') && runner.os != 'Windows'
         run: |
           cd target/${{ matrix.target }}/release
-          while read name; do ln -s ar7json "$name"; done < "$GITHUB_WORKSPACE/symlinks/symlinks"
+          while read name; do ln -s ar7json "$name"; done < "$GITHUB_WORKSPACE/generated/symlinks/symlinks"
 
       - name: Create archive (unix)
         if: startsWith(github.ref, 'refs/tags/') && runner.os != 'Windows'
