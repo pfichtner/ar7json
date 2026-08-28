@@ -16,9 +16,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2
-      - name: Run tests
-        run: cargo test
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Run tests with coverage
+        run: cargo llvm-cov --lcov --output-path lcov.info
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   generate:
     needs: test

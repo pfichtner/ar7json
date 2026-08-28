@@ -3,6 +3,7 @@
 [![Release][release-badge]][release-link]
 [![Build][ci-badge]][ci-link]
 [![License: MIT][license-badge]][license-link]
+[![codecov][codecov-badge]][codecov-link]
 
 [release-badge]: https://img.shields.io/github/v/release/pfichtner/ar7json
 [release-link]: https://github.com/pfichtner/ar7json/releases/latest
@@ -10,6 +11,8 @@
 [ci-link]: https://github.com/pfichtner/ar7json/actions/workflows/build.yml
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
 [license-link]: LICENSE
+[codecov-badge]: https://codecov.io/gh/pfichtner/ar7json/branch/main/graph/badge.svg
+[codecov-link]: https://codecov.io/gh/pfichtner/ar7json
 
 Standalone AR7 ↔ JSON converter for AVM FRITZ!Box `ar7.cfg` configuration files.
 
