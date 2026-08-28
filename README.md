@@ -33,6 +33,22 @@ to JSON, the full power of these existing tools can be applied to FRITZ!Box conf
 and the results can be converted back to AR7 without loss. This avoids writing a new
 dedicated tool for every common operation.
 
+## Why Rust?
+
+This project is written in Rust because the requirements map well to Rust's strengths:
+
+- **Recursive AST with rich value types.** AR7 values (strings, durations, IP addresses,
+  identifiers, etc.) are naturally modeled as a tagged enum — Rust's `enum` with data is
+  the most concise and type-safe way to express this.
+- **Standalone binary with no runtime dependencies.** Users download a single executable
+  that runs on Linux, macOS, and Windows without an interpreter or VM. Cross-compilation
+  to all six target platforms is straightforward.
+- **Mature CLI ecosystem.** `clap`, `serde_json`, and `miette` provide best-in-class
+  argument parsing, JSON serialization, and error reporting with minimal boilerplate.
+
+Alternatives like Go or Python could work, but would require more verbose type modeling
+(Go) or sacrifice single-binary distribution (Python).
+
 ## Use Cases
 
 ### Compare two router backups
