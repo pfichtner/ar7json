@@ -34,10 +34,12 @@ cd ../../..
 mkdir -p "$PKG_DIR/usr/share/bash-completion/completions"
 mkdir -p "$PKG_DIR/usr/share/zsh/vendor-completions"
 mkdir -p "$PKG_DIR/usr/share/fish/vendor_completions.d"
+mkdir -p "$PKG_DIR/usr/share/man/man1"
 
 cp "${WORKSPACE}/completions/ar7json.bash" "$PKG_DIR/usr/share/bash-completion/completions/ar7json"
 cp "${WORKSPACE}/completions/_ar7json" "$PKG_DIR/usr/share/zsh/vendor-completions/_ar7json"
 cp "${WORKSPACE}/completions/ar7json.fish" "$PKG_DIR/usr/share/fish/vendor_completions.d/ar7json.fish"
+cp "${WORKSPACE}/man/ar7json.1" "$PKG_DIR/usr/share/man/man1/ar7json.1"
 
 cat > "$PKG_DIR/DEBIAN/control" <<EOF
 Package: ar7json

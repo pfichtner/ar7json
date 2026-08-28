@@ -33,6 +33,8 @@ jobs:
           ./scripts/generate-completions.sh ./target/debug/ar7json
       - name: Generate binary aliases
         run: ./scripts/generate-symlinks.sh ./target/debug/ar7json
+      - name: Generate man page
+        run: ./scripts/generate-man.sh ./target/debug/ar7json
       - name: Upload completions
         uses: actions/upload-artifact@v7
         with:
@@ -44,6 +46,12 @@ jobs:
         with:
           name: binary-aliases
           path: symlinks/
+          retention-days: 14
+      - name: Upload man page
+        uses: actions/upload-artifact@v7
+        with:
+          name: man-page
+          path: man/
           retention-days: 14
 
   build:
@@ -98,6 +106,11 @@ jobs:
         with:
           name: binary-aliases
           path: symlinks/
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: man-page
+          path: man/
 
       - uses: dtolnay/rust-toolchain@stable
         with:

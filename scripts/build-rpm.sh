@@ -31,6 +31,7 @@ cp "target/${TARGET}/release/ar7json" "$RPM_DIR/SOURCES/"
 cp "${WORKSPACE}/completions/ar7json.bash" "$RPM_DIR/SOURCES/ar7json.bash"
 cp "${WORKSPACE}/completions/_ar7json" "$RPM_DIR/SOURCES/_ar7json"
 cp "${WORKSPACE}/completions/ar7json.fish" "$RPM_DIR/SOURCES/ar7json.fish"
+cp "${WORKSPACE}/man/ar7json.1" "$RPM_DIR/SOURCES/ar7json.1"
 cp "${WORKSPACE}/symlinks/symlinks" "$RPM_DIR/SOURCES/symlinks"
 
 cat > "$RPM_DIR/SPECS/ar7json.spec" <<EOF
@@ -53,6 +54,8 @@ mkdir -p %{buildroot}/usr/share/fish/vendor_completions.d
 cp %{_sourcedir}/ar7json.bash %{buildroot}/usr/share/bash-completion/completions/ar7json
 cp %{_sourcedir}/_ar7json %{buildroot}/usr/share/zsh/vendor-completions/_ar7json
 cp %{_sourcedir}/ar7json.fish %{buildroot}/usr/share/fish/vendor_completions.d/ar7json.fish
+mkdir -p %{buildroot}/usr/share/man/man1
+cp %{_sourcedir}/ar7json.1 %{buildroot}/usr/share/man/man1/ar7json.1
 %files
 %attr(755,root,root) /usr/bin/ar7json
 /usr/bin/ar7-to-json
@@ -62,6 +65,7 @@ cp %{_sourcedir}/ar7json.fish %{buildroot}/usr/share/fish/vendor_completions.d/a
 /usr/share/bash-completion/completions/ar7json
 /usr/share/zsh/vendor-completions/_ar7json
 /usr/share/fish/vendor_completions.d/ar7json.fish
+/usr/share/man/man1/ar7json.1
 EOF
 
 rpmbuild -bb --define "_topdir $RPM_DIR" --target "$RPM_ARCH" "$RPM_DIR/SPECS/ar7json.spec"
