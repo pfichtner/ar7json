@@ -388,4 +388,328 @@ mod tests {
         }));
         assert!(result.is_err());
     }
+
+    #[test]
+    fn ip_address_roundtrip() {
+        let doc = parse("wan = 192.168.1.1;").unwrap();
+        let json = document_to_json(&doc).unwrap();
+        let doc2 = json_to_document(&json).unwrap();
+        entries_equal(&doc.entries, &doc2.entries);
+    }
+
+    #[test]
+    fn mac_address_roundtrip() {
+        let doc = parse("mac = ab:cd:ef:01:23:45;").unwrap();
+        let json = document_to_json(&doc).unwrap();
+        let doc2 = json_to_document(&json).unwrap();
+        entries_equal(&doc.entries, &doc2.entries);
+    }
+
+    #[test]
+    fn raw_value_roundtrip() {
+        let json = serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "raw",
+                "value": { "type": "raw", "text": "some arbitrary text" }
+            }] }
+        });
+        let doc = json_to_document(&json).unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        if let Value::Raw(r) = &doc.entries[0].value {
+            assert_eq!(r.text, "some arbitrary text");
+        } else {
+            panic!("expected raw value");
+        }
+        let json2 = document_to_json(&doc).unwrap();
+        let doc2 = json_to_document(&json2).unwrap();
+        entries_equal(&doc.entries, &doc2.entries);
+    }
+
+    #[test]
+    fn number_json_roundtrip() {
+        let doc = parse("flt = 3.14;").unwrap();
+        let json = document_to_json(&doc).unwrap();
+        let doc2 = json_to_document(&json).unwrap();
+        entries_equal(&doc.entries, &doc2.entries);
+    }
+
+    #[test]
+    fn simple_json_with_list() {
+        let input = r#"foo = "a", "b", "c";"#;
+        let doc = parse(input).unwrap();
+        let simple = ar7json::json::document_to_simple_json(&doc).unwrap();
+        let obj = simple.as_object().unwrap();
+        let foo = obj.get("foo").unwrap();
+        assert!(foo.is_array());
+        assert_eq!(foo.as_array().unwrap().len(), 3);
+    }
+
+    #[test]
+    fn simple_json_with_ip_address() {
+        let input = "wan = 192.168.1.1;";
+        let doc = parse(input).unwrap();
+        let simple = ar7json::json::document_to_simple_json(&doc).unwrap();
+        let obj = simple.as_object().unwrap();
+        assert_eq!(obj.get("wan").unwrap(), "192.168.1.1");
+    }
+
+    #[test]
+    fn simple_json_with_mac_address() {
+        let input = "mac = ab:cd:ef:01:23:45;";
+        let doc = parse(input).unwrap();
+        let simple = ar7json::json::document_to_simple_json(&doc).unwrap();
+        let obj = simple.as_object().unwrap();
+        assert_eq!(obj.get("mac").unwrap(), "ab:cd:ef:01:23:45");
+    }
+
+    #[test]
+    fn simple_json_with_raw_value() {
+        let json = serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "raw",
+                "value": { "type": "raw", "text": "some text" }
+            }] }
+        });
+        let doc = json_to_document(&json).unwrap();
+        let simple = ar7json::json::document_to_simple_json(&doc).unwrap();
+        let obj = simple.as_object().unwrap();
+        assert_eq!(obj.get("raw").unwrap(), "some text");
+    }
+
+    #[test]
+    fn integer_json_missing_value_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "foo",
+                "value": { "type": "integer", "raw": "42" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn number_json_missing_value_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "foo",
+                "value": { "type": "number", "raw": "3.14" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn boolean_json_missing_value_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "foo",
+                "value": { "type": "boolean", "raw": "yes" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn raw_json_missing_text_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "foo",
+                "value": { "type": "raw" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn ip_address_from_json_roundtrip() {
+        let json = serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "wan",
+                "value": { "type": "ip_address", "value": "192.168.1.1" }
+            }] }
+        });
+        let doc = json_to_document(&json).unwrap();
+        let json_out = document_to_json(&doc).unwrap();
+        let doc2 = json_to_document(&json_out).unwrap();
+        entries_equal(&doc.entries, &doc2.entries);
+    }
+
+    #[test]
+    fn mac_address_from_json_roundtrip() {
+        let json = serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "mac",
+                "value": { "type": "mac_address", "value": "ab:cd:ef:01:23:45" }
+            }] }
+        });
+        let doc = json_to_document(&json).unwrap();
+        let json_out = document_to_json(&doc).unwrap();
+        let doc2 = json_to_document(&json_out).unwrap();
+        entries_equal(&doc.entries, &doc2.entries);
+    }
+
+    #[test]
+    fn list_from_json_roundtrip() {
+        let json = serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "items",
+                "value": {
+                    "type": "list",
+                    "items": [
+                        { "type": "integer", "value": 1, "raw": "1" },
+                        { "type": "integer", "value": 2, "raw": "2" }
+                    ]
+                }
+            }] }
+        });
+        let doc = json_to_document(&json).unwrap();
+        let json_out = document_to_json(&doc).unwrap();
+        let doc2 = json_to_document(&json_out).unwrap();
+        entries_equal(&doc.entries, &doc2.entries);
+    }
+
+    #[test]
+    fn object_from_json_roundtrip() {
+        let json = serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "block",
+                "value": {
+                    "type": "object",
+                    "entries": [{
+                        "key": "inner",
+                        "value": { "type": "integer", "value": 42, "raw": "42" }
+                    }]
+                }
+            }] }
+        });
+        let doc = json_to_document(&json).unwrap();
+        let json_out = document_to_json(&doc).unwrap();
+        let doc2 = json_to_document(&json_out).unwrap();
+        entries_equal(&doc.entries, &doc2.entries);
+    }
+
+    #[test]
+    fn ip_address_missing_value_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "wan",
+                "value": { "type": "ip_address" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn mac_address_missing_value_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "mac",
+                "value": { "type": "mac_address" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn list_missing_items_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "items",
+                "value": { "type": "list" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn list_items_not_array_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "items",
+                "value": { "type": "list", "items": "not_array" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn object_missing_entries_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "block",
+                "value": { "type": "object" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn object_entries_not_array_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "block",
+                "value": { "type": "object", "entries": "not_array" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn identifier_missing_value_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "foo",
+                "value": { "type": "identifier" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn duration_missing_value_rejected() {
+        let result = json_to_document(&serde_json::json!({
+            "format": "ar7json",
+            "version": 1,
+            "document": { "entries": [{
+                "key": "foo",
+                "value": { "type": "duration", "unit": "m", "raw": "1m" }
+            }] }
+        }));
+        assert!(result.is_err());
+    }
+
 }

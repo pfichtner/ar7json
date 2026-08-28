@@ -134,4 +134,5 @@ mod tests {
         let out2 = serialize(&doc2).unwrap();
         assert_eq!(out1, out2, "format is not idempotent");
     }
+
 }

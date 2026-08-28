@@ -198,4 +198,43 @@ ar7cfg {
         assert_eq!(doc.entries.len(), 1);
         assert_eq!(doc.entries[0].key, "yes");
     }
+
+    #[test]
+    fn trailing_block_comment() {
+        let doc = parse("foo = 1;\n/* trailing */\n").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        assert_eq!(doc.entries[0].key, "foo");
+    }
+
+    #[test]
+    fn trailing_line_comment() {
+        let doc = parse("foo = 1;\n// trailing\n").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        assert_eq!(doc.entries[0].key, "foo");
+    }
+
+    #[test]
+    fn list_with_block_entries() {
+        let doc = parse("items = {\n    a = 1;\n}, {\n    b = 2;\n};").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        if let Value::List(list) = &doc.entries[0].value {
+            assert_eq!(list.items.len(), 2);
+        } else {
+            panic!("expected list");
+        }
+    }
+
+    #[test]
+    fn empty_value_after_equals() {
+        let doc = parse("foo = ;").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        assert_eq!(doc.entries[0].key, "foo");
+    }
+
+    #[test]
+    fn inline_block_comment_preserved() {
+        let doc = parse("foo = 1; /* inline */").unwrap();
+        assert_eq!(doc.entries.len(), 1);
+        assert_eq!(doc.entries[0].key, "foo");
+    }
 }
