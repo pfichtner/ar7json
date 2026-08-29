@@ -1,0 +1,32 @@
+# Error reporting via `check` for malformed input.
+# Unexpected end of file at a value position.
+```console
+$ ar7json check tests/fixtures/eof-value.ar7
+? 1
+ar7json: unexpected end of file; expected ["value"]
+
+```
+
+# Unexpected end of file inside an object block (missing closing brace).
+```console
+$ ar7json check tests/fixtures/eof-block.ar7
+? 1
+ar7json: unexpected end of file; expected ["'}'", "entry"]
+
+```
+
+# Unterminated string becomes a general lexer error.
+```console
+$ ar7json check tests/fixtures/unterminated-string.ar7
+? 1
+ar7json: unterminated string starting at position 6 (line 1, column 7)
+
+```
+
+# General error: list longer than the allowed maximum.
+```console
+$ ar7json check tests/fixtures/max-list.ar7
+? 1
+ar7json: maximum list length exceeded
+
+```

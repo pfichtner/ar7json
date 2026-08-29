@@ -24,16 +24,6 @@ pub enum Ar7Error {
         span: SourceSpan,
     },
 
-    #[error("invalid string: {message}")]
-    #[diagnostic(code(ar7::invalid_string))]
-    InvalidString {
-        message: String,
-        #[source_code]
-        source_code: String,
-        #[label("{message}")]
-        span: SourceSpan,
-    },
-
     #[error("invalid number: {text}")]
     #[diagnostic(code(ar7::invalid_number))]
     InvalidNumber {
@@ -77,14 +67,6 @@ impl Ar7Error {
     pub fn unexpected_eof(expected: Vec<&str>, source_code: String, span: SourceSpan) -> Self {
         Ar7Error::UnexpectedEof {
             expected: expected.into_iter().map(String::from).collect(),
-            source_code,
-            span,
-        }
-    }
-
-    pub fn invalid_string(message: &str, source_code: String, span: SourceSpan) -> Self {
-        Ar7Error::InvalidString {
-            message: message.to_string(),
             source_code,
             span,
         }
