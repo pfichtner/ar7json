@@ -41,6 +41,10 @@ jobs:
         run: cargo clippy --all-targets -- -D warnings
 
   audit:
+    # rustsec/audit-check's GitHub App can only create its check run on PR
+    # events (pushes to main fail with "Resource not accessible by integration");
+    # dependency changes all arrive as PRs, so PR-only loses no coverage.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
