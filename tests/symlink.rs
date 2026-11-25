@@ -3,15 +3,11 @@ use std::io::Write;
 use std::process::{Command, Stdio};
 
 fn binary_path() -> std::path::PathBuf {
-    let mut path = std::env::current_exe()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .to_path_buf();
-    path.push("ar7json");
-    path
+    // cargo sets CARGO_BIN_EXE_ar7json for integration tests; deriving it from
+    // current_exe only worked under the old target/debug/deps layout.
+    std::env::var("CARGO_BIN_EXE_ar7json")
+        .map(std::path::PathBuf::from)
+        .expect("CARGO_BIN_EXE_ar7json is always set by cargo test")
 }
 
 fn create_symlinks(dir: &std::path::Path) {
